@@ -1,8 +1,13 @@
 import sqlite3 from "sqlite3";
 import { open, Database } from "sqlite";
 import path from "path";
+import { fileURLToPath } from "url";
 
 let dbInstance: Database<sqlite3.Database, sqlite3.Statement> | null = null;
+
+const __filename = fileURLToPath(import.meta.url);
+
+const __dirname = path.dirname(__filename);
 
 export const getDb = async () => {
   if (dbInstance) {
@@ -33,5 +38,5 @@ export const initDb = async () => {
     create_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
     `);
-  console.log("Db Creato");
+  console.log("Database Created");
 };
