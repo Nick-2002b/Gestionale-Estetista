@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import { initDb } from "./config/database.js";
+import authRoutes from "./routes/authRoutes.js";
 
 const app = express();
 const port: number = 3000;
@@ -23,6 +24,8 @@ initDb().catch((err) => {
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok", message: "Backend is working" });
 });
+
+app.use("/api/auth", authRoutes);
 
 app.listen(port, "0.0.0.0", () => {
   console.log(`http://localhost:${port}`);
