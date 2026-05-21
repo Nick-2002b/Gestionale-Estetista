@@ -2,7 +2,6 @@ import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { UserModel } from "../models/User.js";
-import { error } from "node:console";
 
 const cookieOptions = {
   httpOnly: true,
@@ -94,4 +93,24 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 export const logout = (req: Request, res: Response): void => {
   res.clearCookie("jwt", cookieOptions);
   res.status(200).json({ message: "Logout successfully" });
+};
+
+export const getMe = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ error: "Not authenticated" });
+      return;
+    }
+
+    const user = await UserModel.findById(req.user.id);
+    if (!user) {
+      res.status(404).json({ error: "User not found" });
+      return;
+    }
+
+    res.status(200).json({ user });
+  } catch (error) {
+    console.error("Error in getMe:", error);
+    res.status(500).json({ error: "Server error" });
+  }
 };
