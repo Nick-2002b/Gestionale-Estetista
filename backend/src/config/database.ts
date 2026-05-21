@@ -37,7 +37,7 @@ export const initDb = async () => {
     email TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL,
     role TEXT DEFAULT 'admin',
-    create_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
     `);
   console.log("Database Created");
