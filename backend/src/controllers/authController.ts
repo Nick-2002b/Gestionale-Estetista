@@ -20,13 +20,13 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     }
 
     if (password !== confirmPassword) {
-      res.status(400).json({ error: "Passwords dont match" });
+      res.status(400).json({ error: "Le password non coincidono" });
       return;
     }
 
     const existingUser = await UserModel.findByEmail(email);
     if (existingUser) {
-      res.status(409).json({ error: "Email already in use" });
+      res.status(409).json({ error: "Email gia in uso" });
       return;
     }
 
@@ -39,7 +39,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       email,
       password: hashedPassword,
     });
-    res.status(201).json({ message: "Sign in completed successfully" });
+    res.status(201).json({ message: "Registrazione effettuata con successo" });
   } catch (error) {
     console.error("Error to sign in:", error);
     res.status(500).json({ error: "Server error" });
@@ -51,19 +51,19 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      res.status(400).json({ error: "Email and Password required" });
+      res.status(400).json({ error: "Email e Password sono obbligatori" });
       return;
     }
 
     const user = await UserModel.findByEmail(email);
     if (!user || !user.password) {
-      res.status(401).json({ error: "Invalid credentials" });
+      res.status(401).json({ error: "Email o Password errati" });
       return;
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      res.status(401).json({ error: "Invalid credentials" });
+      res.status(401).json({ error: "Email o Password errati" });
       return;
     }
 
