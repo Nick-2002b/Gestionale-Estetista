@@ -6,8 +6,8 @@ import { useAuthStore } from "../stores/auth";
 const authStore = useAuthStore();
 const router = useRouter();
 
-const email = ref("");
-const password = ref("");
+const email = ref("test@gmail.com");
+const password = ref("123");
 const confirmPassword = ref("");
 const name = ref("");
 const surname = ref("");
