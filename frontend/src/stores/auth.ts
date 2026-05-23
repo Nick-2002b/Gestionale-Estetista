@@ -34,11 +34,15 @@ export const useAuthStore = defineStore("auth", () => {
     isAuthenticated.value = true;
   };
 
+  const register = async (payload: Record<string, string>): Promise<void> => {
+    await api.post("/auth/register", payload);
+  };
+
   const logout = async (): Promise<void> => {
     await api.post("/auth/logout");
     user.value = null;
     isAuthenticated.value = false;
   };
 
-  return { user, isAuthenticated, isReady, checkAuth, login, logout };
+  return { user, isAuthenticated, isReady, checkAuth, login, register, logout };
 });
