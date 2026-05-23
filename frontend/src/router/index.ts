@@ -2,7 +2,10 @@ import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 import { useAuthStore } from "../stores/auth";
 
 import Login from "../pages/Login.vue";
-import Dashboard from "../pages/Dashboard.vue";
+import Agenda from "../pages/Agenda.vue";
+import Treatments from "../pages/Treatments.vue";
+import Clients from "../pages/Clients.vue";
+import Layout from "../layouts/MainLayout.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -13,9 +16,25 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: "/",
-    name: "Dashboard",
-    component: Dashboard,
+    component: Layout,
     meta: { requiresAuth: true },
+    children: [
+      {
+        path: "",
+        name: "Agenda",
+        component: Agenda,
+      },
+      {
+        path: "treatments",
+        name: "Treatments",
+        component: Treatments,
+      },
+      {
+        path: "clients",
+        name: "Clients",
+        component: Clients,
+      },
+    ],
   },
 ];
 
@@ -24,7 +43,7 @@ const router = createRouter({
   routes,
 });
 
-router.beforeEach(async (to, from, next) => {
+router.beforeEach(async (to, _from, next) => {
   const authStore = useAuthStore();
 
   //se e il primo caricmaneto dell'app, interroghiamo il backend
@@ -35,7 +54,7 @@ router.beforeEach(async (to, from, next) => {
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     next({ name: "Login" }); // reindirizza l'utente se non si e autenticato
   } else if (to.meta.requiresGuest && authStore.isAuthenticated) {
-    next({ name: "Dashboard" });
+    next({ name: "Agenda" });
   } else {
     next();
   }

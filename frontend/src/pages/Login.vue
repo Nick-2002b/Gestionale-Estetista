@@ -41,7 +41,7 @@ const handleLogin = async () => {
       password: password.value,
     });
 
-    router.push({ name: "Dashboard" });
+    router.push({ name: "Agenda" });
   } catch (error: any) {
     errorMessage.value = error.response?.data?.error || "Errore imprevisto durante il login.";
   } finally {
@@ -70,7 +70,6 @@ const handleRegister = async () => {
     resetRegisterFields();
     password.value = "";
     isLogin.value = true;
-    errorMessage.value = "Registrazione completata. Ora puoi accedere.";
   } catch (error: any) {
     errorMessage.value = error.response?.data?.error || "Errore imprevisto durante la registrazione.";
   } finally {
