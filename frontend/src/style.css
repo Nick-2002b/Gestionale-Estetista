@@ -12,10 +12,22 @@
   --color-gold-light: #fde1a7;
   --color-pink: #ffa3cf;
   --color-pink-light: #ffd5ea;
+  --color-pink-dark: #e274ab;
   --font-sans: "Inter", "Inter Fallback", ui-sans-serif, system-ui, sans-serif;
 }
 
 .fc {
   --fc-border-color: #f3f4f6; /*gray-100*/
   --fc-today-bg-color: var(--color-background);
+  --fc-border-color: #89536e57;
+}
+
+.fc .fc-scroller::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.fc .fc-scrollgrid-section-header .fc-scroller {
+  scrollbar-width: none;
 }
