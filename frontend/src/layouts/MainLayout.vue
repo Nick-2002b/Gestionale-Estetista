@@ -36,7 +36,7 @@ const isActiveRoute = (path: string) => route.path === path;
 </script>
 
 <template>
-  <div class="flex h-screen bg-surface font-sans">
+  <div class="flex bg-surface font-sans">
     <aside class="w-64 bg-surface border-r border-gray-200">
       <div class="h-20 flex items-center px-6 border-b border-gray-100">
         <div class="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center mr-3">

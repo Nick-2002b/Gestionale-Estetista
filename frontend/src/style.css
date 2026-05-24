@@ -14,3 +14,8 @@
   --color-pink-light: #ffd5ea;
   --font-sans: "Inter", "Inter Fallback", ui-sans-serif, system-ui, sans-serif;
 }
+
+.fc {
+  --fc-border-color: #f3f4f6; /*gray-100*/
+  --fc-today-bg-color: var(--color-background);
+}
