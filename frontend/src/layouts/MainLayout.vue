@@ -44,7 +44,7 @@ const isActiveRoute = (path: string) => route.path === path;
         </div>
         <h1 class="text-gray-800 text-lg">CC Beauty Lab</h1>
       </div>
-
+      <!-- Navigation -->
       <nav class="flex-1 px-4 py-6 space-y-2">
         <RouterLink
           v-for="item in navigation"
@@ -119,7 +119,7 @@ const isActiveRoute = (path: string) => route.path === path;
                   stroke-width="2"
                   stroke-linecap="round"
                   stroke-linejoin="round"
-                  class="lucide lucide-log-out mr-1 h-4 w-4"
+                  class="mr-1 h-4 w-4"
                   aria-hidden="true">
                   <path d="m16 17 5-5-5-5"></path>
                   <path d="M21 12H9"></path>
@@ -132,7 +132,7 @@ const isActiveRoute = (path: string) => route.path === path;
         </div>
       </header>
 
-      <main class="flex-1 overflow-y-auto p-8">
+      <main class="flex-1 overflow-y-auto px-8 pb-8">
         <RouterView />
       </main>
     </div>

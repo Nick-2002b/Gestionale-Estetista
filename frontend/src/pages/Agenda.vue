@@ -3,6 +3,7 @@ import { ref, onMounted, nextTick } from "vue";
 import FullCalendar from "@fullcalendar/vue3";
 import type { CalendarOptions } from "@fullcalendar/core";
 import { useCalendar } from "../components/Calendar.ts";
+import PageHeader from "../components/ViewHeader.vue";
 
 const { calendarOptions } = useCalendar() as { calendarOptions: CalendarOptions };
 
@@ -10,6 +11,16 @@ const calendarRef = ref<InstanceType<typeof FullCalendar> | null>(null);
 
 const currentTitle = ref("");
 const currentView = ref("timeGridWeek");
+
+const viewModes = [
+  { label: "Giorno", value: "timeGridDay" },
+  { label: "Settimana", value: "timeGridWeek" },
+  { label: "Mese", value: "dayGridMonth" },
+];
+
+const handleAddAppointment = () => {
+  console.log("Nuovo Appuntamento cliccato");
+};
 
 const getCalendarApi = () => {
   return calendarRef.value?.getApi();
@@ -52,9 +63,11 @@ onMounted(async () => {
 
 <template>
   <div class="space-y-4">
+    <PageHeader title="Agenda" button-text="Nuovo Appuntamento" @action="handleAddAppointment" />
+
     <div class="flex flex-col md:flex-row md:items-center md:justify-between">
       <div class="flex p-1 items-center rounded-full shadow-sm border border-gray-200 space-x-1 me-3">
-        <button @click="goPrev" class="p-2 text-gray-600 transition-colors rounded-full hover:bg-pink-light">
+        <button @click="goPrev" class="p-2 text-gray-600 transition-colors rounded-full hover:bg-pink-light cursor-pointer">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="24"
@@ -70,7 +83,7 @@ onMounted(async () => {
             <path d="m15 18-6-6 6-6"></path>
           </svg>
         </button>
-        <button @click="goNext" class="p-2 text-gray-600 transition-colors rounded-full hover:bg-pink-light">
+        <button @click="goNext" class="p-2 text-gray-600 transition-colors rounded-full hover:bg-pink-light cursor-pointer">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="24"
@@ -87,33 +100,34 @@ onMounted(async () => {
           </svg>
         </button>
       </div>
-      <button @click="goToday" class="px-4 py-2 bg-surface border border-gray-200 rounded-full shadow-sm hover:bg-pink-light text-sm font-medium text-gray-700 transition-colors">Oggi</button>
+      <button @click="goToday" class="px-4 py-2 bg-surface border border-gray-200 rounded-full shadow-sm hover:bg-pink-light text-sm font-medium text-gray-700 transition-colors cursor-pointer">
+        Oggi
+      </button>
 
       <h2 class="w-full text-center text-2xl font-bold text-text-main capitalize">
         {{ currentTitle }}
       </h2>
 
-      <div class="flex bg-surface border border-gray-200 p-1 rounded-xl shadow-sm space-x-1">
-        <button
-          @click="changeView('timeGridDay')"
-          :class="['px-4 py-2 text-sm font-medium rounded-lg transition-all', currentView === 'timeGridDay' ? 'bg-primary text-white shadow-sm' : 'text-gray-500 hover:text-gray-700']">
-          Giorno
-        </button>
-        <button
-          @click="changeView('timeGridWeek')"
-          :class="['px-4 py-2 text-sm font-medium rounded-lg transition-all', currentView === 'timeGridWeek' ? 'bg-primary text-white shadow-sm' : 'text-gray-500 hover:text-gray-700']">
-          Settimana
-        </button>
-        <button
-          @click="changeView('dayGridMonth')"
-          :class="['px-4 py-2 text-sm font-medium rounded-lg transition-all', currentView === 'dayGridMonth' ? 'bg-primary text-white shadow-sm' : 'text-gray-500 hover:text-gray-700']">
-          Mese
-        </button>
+      <div class="flex bg-gray-100 border border-gray-200 rounded-full shadow-sm">
+        <div class="flex p-1 space-x-2">
+          <button
+            v-for="viewMode in viewModes"
+            :key="viewMode.value"
+            @click="changeView(viewMode.value)"
+            :class="[
+              'px-4 py-1 text-sm font-medium rounded-full transition-all cursor-pointer',
+              currentView === viewMode.value ? 'bg-surface shadow-sm text-gray-900' : 'text-gray-500 hover:bg-gray-200',
+            ]">
+            {{ viewMode.label }}
+          </button>
+        </div>
       </div>
     </div>
 
-    <div class="bg-surface rounded-2xl shadow-sm outline-none overflow-hidden">
-      <FullCalendar ref="calendarRef" :options="calendarOptions" />
+    <div class="rounded-2xl bg-gray-200 p-px shadow-sm">
+      <div class="overflow-hidden rounded-2xl bg-surface">
+        <FullCalendar ref="calendarRef" :options="calendarOptions" />
+      </div>
     </div>
   </div>
 </template>
