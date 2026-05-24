@@ -11,7 +11,7 @@ app.use(express.json()); //permette di leggere il body in formato json
 app.use(cookieParser());
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: true,
     credentials: true, // in questo modo il frontend puo inviare cookie al backend
   }),
 );
