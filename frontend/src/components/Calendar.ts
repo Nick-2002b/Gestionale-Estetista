@@ -14,24 +14,21 @@ export function useCalendar() {
       timeGridWeek: {
         titleFormat: { year: "numeric", month: "short", day: "numeric" },
         dayHeaderFormat: { weekday: "short", day: "numeric" },
-        slotLabelFormat: { hour: "2-digit", minute: "2-digit", hour12: false },
+      },
+      dayGridMonth: {
+        titleFormat: { year: "numeric", month: "short", day: "numeric" },
       },
     },
-    // headerToolbar: {
-    //   left: "prev,next today",
-    //   center: "title",
-    //   right: "timeGridDay,timeGridWeek,dayGridMonth",
-    // },
     headerToolbar: false,
 
     slotDuration: "00:10:00", // Righe create ogni 10 min
-    slotLabelInterval: "01:00:00", // Testp dell'ora stampato solo ogni ora
+    slotLabelInterval: "00:30:00", // Test dell'ora stampato solo ogni
     titleFormat: { year: "numeric", month: "long", day: "numeric", weekday: "long" },
     dayHeaderFormat: { weekday: "short", day: "numeric" },
     slotLabelFormat: { hour: "2-digit", minute: "2-digit", hour12: false },
 
     slotMinTime: "08:00:00",
-    slotMaxTime: "21:00:00",
+    slotMaxTime: "20:00:00",
     allDaySlot: false,
     expandRows: true,
 
