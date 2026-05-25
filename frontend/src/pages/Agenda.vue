@@ -55,6 +55,10 @@ const changeView = (viewName: string) => {
   updateCalendarState();
 };
 
+const formatDayName = (date: Date) => {
+  return new Intl.DateTimeFormat("it-IT", { weekday: "short" }).format(date);
+};
+
 onMounted(async () => {
   await nextTick();
   updateCalendarState();
@@ -126,7 +130,19 @@ onMounted(async () => {
 
     <div class="rounded-2xl bg-gray-200 p-px shadow-sm">
       <div class="overflow-hidden rounded-2xl bg-surface">
-        <FullCalendar ref="calendarRef" :options="calendarOptions" />
+        <FullCalendar ref="calendarRef" :options="calendarOptions">
+          <template v-slot:dayHeaderContent="arg">
+            <div class="flex flex-col items-center justify-center py-2">
+              <span class="text-xs font-medium text-gray-400 uppercase mb-1 tracking-wider">
+                {{ formatDayName(arg.date) }}
+              </span>
+
+              <span :class="['font-semibold w-8 h-8 flex items-center justify-center rounded-full transition-colors', arg.isToday ? 'bg-pink  shadow-sm' : 'text-gray-800']">
+                {{ arg.date.getDate() }}
+              </span>
+            </div>
+          </template>
+        </FullCalendar>
       </div>
     </div>
   </div>

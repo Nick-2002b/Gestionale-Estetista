@@ -90,7 +90,7 @@ const isActiveRoute = (path: string) => route.path === path;
     <!-- TopBar -->
     <div class="flex-1">
       <header class="h-20 bg-white border-b border-gray-200 flex items-center justify-end px-8">
-        <div ref="dropdownRef" class="relative border border-gray-200 p-1.5 rounded-full hover:bg-pink-100">
+        <div ref="dropdownRef" class="relative border border-gray-200 p-1.5 rounded-full hover:bg-pink-100 transition-colors">
           <button @click="showDropdown = !showDropdown" class="flex items-center space-x-3 cursor-pointer">
             <div class="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center font-bold text-sm">
               {{ userInitials }}
