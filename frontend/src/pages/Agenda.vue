@@ -4,6 +4,7 @@ import FullCalendar from "@fullcalendar/vue3";
 import type { CalendarOptions } from "@fullcalendar/core";
 import { useCalendar } from "../components/Calendar.ts";
 import PageHeader from "../components/ViewHeader.vue";
+import AppointmentModal from "../components/AppointmentModal.vue";
 
 const { calendarOptions } = useCalendar() as { calendarOptions: CalendarOptions };
 
@@ -11,6 +12,7 @@ const calendarRef = ref<InstanceType<typeof FullCalendar> | null>(null);
 
 const currentTitle = ref("");
 const currentView = ref("timeGridWeek");
+const isModalOpen = ref(false);
 
 const viewModes = [
   { label: "Giorno", value: "timeGridDay" },
@@ -19,7 +21,15 @@ const viewModes = [
 ];
 
 const handleAddAppointment = () => {
-  console.log("Nuovo Appuntamento cliccato");
+  isModalOpen.value = true;
+};
+
+const handleCloseAppointmentModal = () => {
+  isModalOpen.value = false;
+};
+
+const handleSaveAppointment = () => {
+  isModalOpen.value = false;
 };
 
 const getCalendarApi = () => {
@@ -68,6 +78,7 @@ onMounted(async () => {
 <template>
   <div class="space-y-4">
     <PageHeader title="Agenda" button-text="Nuovo Appuntamento" @action="handleAddAppointment" />
+    <AppointmentModal :is-open="isModalOpen" @close="handleCloseAppointmentModal" @save="handleSaveAppointment" />
 
     <div class="flex flex-col md:flex-row md:items-center md:justify-between">
       <div class="flex p-1 items-center rounded-full shadow-sm border border-gray-200 space-x-1 me-3">
