@@ -61,9 +61,9 @@ export const initDb = async () => {
       name TEXT NOT NULL,
       category TEXT NOT NULL,
       duration INTEGER NOT NULL,
-      price REAL
+      price REAL,
       description TEXT,
-      is_active INTEGER DEFAULT 1,
+      is_active INTEGER DEFAULT 1
     );
   `);
 
