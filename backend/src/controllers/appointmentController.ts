@@ -79,3 +79,22 @@ export const getAppointments = async (req: Request, res: Response): Promise<void
     res.status(500).json({ error: "Server Error" });
   }
 };
+
+export const deleteAppointment = async (req: Request, res: Response): Promise<void> => {
+  const db = await getDb();
+  const appointmentId = req.params.id;
+
+  try {
+    const result = await db.run("DELETE FROM appointments WHERE id = ?", [appointmentId]);
+    
+    if (result.changes === 0) {
+      res.status(404).json({ error: "Appuntamento non trovato" });
+      return;
+    }
+
+    res.status(200).json({ message: "Appuntamento eliminato con successo" });
+  } catch (error) {
+    console.error("Errore durante l'eliminazione dell'appuntamento:", error);
+    res.status(500).json({ error: "Server Error" });
+  }
+};
