@@ -1,14 +1,88 @@
 <script setup lang="ts">
-import { ref, onMounted, nextTick } from "vue";
+import { ref, onMounted, nextTick, computed, onUnmounted } from "vue";
 import FullCalendar from "@fullcalendar/vue3";
 import type { CalendarOptions } from "@fullcalendar/core";
 import { useCalendar } from "../components/Calendar.ts";
 import PageHeader from "../components/ViewHeader.vue";
 import AppointmentModal from "../components/AppointmentModal.vue";
+import { useAppointmentStore } from "../stores/appointments";
 
-const { calendarOptions } = useCalendar() as { calendarOptions: CalendarOptions };
+const appointmentStore = useAppointmentStore();
+
+const contextMenu = ref({
+  visible: false,
+  x: 0,
+  y: 0,
+  eventId: null as string | null,
+});
+
+const openContextMenu = (event: MouseEvent, calendarEvent: any) => {
+  contextMenu.value = {
+    visible: true,
+    x: event.clientX,
+    y: event.clientY,
+    eventId: calendarEvent.id,
+  };
+};
+
+const closeContextMenu = () => {
+  contextMenu.value.visible = false;
+};
+
+const handleDeleteAppointment = async () => {
+  if (!contextMenu.value.eventId) return;
+  if (confirm("Sei sicuro di voler eliminare questo appuntamento?")) {
+    try {
+      await appointmentStore.deleteAppointment(contextMenu.value.eventId);
+    } catch (error) {
+      alert("Errore durante l'eliminazione");
+    }
+  }
+  closeContextMenu();
+};
+
+onMounted(() => {
+  appointmentStore.fetchAppointments();
+  document.addEventListener("click", closeContextMenu);
+});
+
+const calendarEvents = computed(() => {
+  return appointmentStore.appointmentsList.map((appt) => {
+    // Uniamo i nomi dei trattamenti in una singola stringa separata da virgola per poterli passare a FullCalendar
+    const serviceNames = appt.treatments.map((t: any) => t.name).join(", ");
+
+    return {
+      id: String(appt.id),
+      title: `${appt.client_name} ${appt.client_surname}`,
+      start: `${appt.date}T${appt.start_time}:00`,
+      end: `${appt.date}T${appt.end_time}:00`,
+      extendedProps: {
+        service: serviceNames,
+        notes: appt.notes,
+      },
+    };
+  });
+});
+const { calendarOptions } = useCalendar();
+
+const finalCalendarOptions = computed(() => {
+  return {
+    ...calendarOptions.value,
+    events: calendarEvents.value,
+  } as CalendarOptions;
+});
 
 const calendarRef = ref<InstanceType<typeof FullCalendar> | null>(null);
+
+const handleSaveAppointment = async (payload: any) => {
+  try {
+    await appointmentStore.createAppointment(payload);
+    isModalOpen.value = false;
+  } catch (error) {
+    console.error("Errore salvataggio:", error);
+    alert("Non è stato possibile salvare l'appuntamento.");
+  }
+};
 
 const currentTitle = ref("");
 const currentView = ref("timeGridWeek");
@@ -25,10 +99,6 @@ const handleAddAppointment = () => {
 };
 
 const handleCloseAppointmentModal = () => {
-  isModalOpen.value = false;
-};
-
-const handleSaveAppointment = () => {
   isModalOpen.value = false;
 };
 
@@ -73,10 +143,31 @@ onMounted(async () => {
   await nextTick();
   updateCalendarState();
 });
+
+onUnmounted(() => {
+  document.removeEventListener("click", closeContextMenu);
+});
 </script>
 
 <template>
-  <div class="space-y-4">
+  <div class="space-y-4 relative">
+    <!-- Menu Contestuale (Click Destro) -->
+    <div
+      v-if="contextMenu.visible"
+      :style="{ top: `${contextMenu.y}px`, left: `${contextMenu.x}px` }"
+      class="fixed z-50 bg-white border border-gray-200 rounded-full shadow-sm w-32 m-0 overflow-hidden">
+      <button @click.stop="handleDeleteAppointment" class="text-left w-full p-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 transition-colors cursor-pointer">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 6h18" />
+          <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+          <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+          <line x1="10" x2="10" y1="11" y2="17" />
+          <line x1="14" x2="14" y1="11" y2="17" />
+        </svg>
+        <span>Elimina</span>
+      </button>
+    </div>
+
     <PageHeader title="Agenda" button-text="Nuovo Appuntamento" @action="handleAddAppointment" />
     <AppointmentModal :is-open="isModalOpen" @close="handleCloseAppointmentModal" @save="handleSaveAppointment" />
 
@@ -141,7 +232,7 @@ onMounted(async () => {
 
     <div class="rounded-2xl bg-gray-200 p-px shadow-sm">
       <div class="overflow-hidden rounded-2xl bg-surface">
-        <FullCalendar ref="calendarRef" :options="calendarOptions">
+        <FullCalendar ref="calendarRef" :options="finalCalendarOptions">
           <template v-slot:dayHeaderContent="arg">
             <div class="flex flex-col items-center justify-center py-2">
               <span class="text-xs font-medium text-gray-400 uppercase mb-1 tracking-wider">
@@ -151,6 +242,37 @@ onMounted(async () => {
               <span :class="['font-semibold w-8 h-8 flex items-center justify-center rounded-full transition-colors', arg.isToday ? 'bg-pink  shadow-sm' : 'text-gray-800']">
                 {{ arg.date.getDate() }}
               </span>
+            </div>
+          </template>
+
+          <template v-slot:eventContent="arg">
+            <!-- Se l'appuntamento e meno di 15 min usiamo un layout diverso per l'evento -->
+            <div
+              v-if="((arg.event.end?.getTime() || 0) - (arg.event.start?.getTime() || 0)) / 60000 <= 15"
+              @contextmenu.prevent="openContextMenu($event, arg.event)"
+              class="h-full w-full pt-0.5 px-1.5 rounded-xl border-l-4 bg-blue-50 border-primary text-gray-800 overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer flex items-start justify-start gap-1 leading-none">
+              <div class="text-xs text-left font-bold text-primary whitespace-nowrap">
+                {{ arg.timeText }}
+              </div>
+              <div class="text-xs text-left font-semibold truncate leading-tight">
+                {{ arg.event.title }}
+              </div>
+            </div>
+
+            <div
+              v-else
+              @contextmenu.prevent="openContextMenu($event, arg.event)"
+              class="h-full w-full flex flex-col pt-0.5 px-1.5 pb-1 rounded-xl border-l-4 bg-blue-50 border-primary text-gray-800 overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer items-start justify-start leading-none gap-0.5">
+              <div class="flex items-start justify-start gap-1 w-full overflow-hidden">
+                <div class="text-xs font-bold text-primary whitespace-nowrap">
+                  {{ arg.timeText }}
+                </div>
+                <div class="text-xs font-semibold text-left truncate leading-tight">
+                  {{ arg.event.title }}
+                </div>
+              </div>
+
+              <div v-if="arg.event.extendedProps.notes" class="text-xs text-gray-500 text-left w-full truncate mt-auto">Note: {{ arg.event.extendedProps.notes }}</div>
             </div>
           </template>
         </FullCalendar>
