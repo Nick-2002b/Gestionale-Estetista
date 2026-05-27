@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
+import BaseModal from "./BaseModal.vue";
 import { api } from "../utils/axios";
 import { calculateEndTime } from "../utils/timeCalculator";
 
@@ -89,10 +90,6 @@ const removeTreatment = (index: number) => {
   selectedTreatments.value.splice(index, 1);
 };
 
-const handleClose = () => {
-  emit("close");
-};
-
 const handleSave = () => {
   const payload = {
     clientId: selectedClientId.value,
@@ -111,127 +108,72 @@ const handleSave = () => {
 </script>
 
 <template>
-  <Teleport to="body">
-    <transition name="overlay">
-      <div v-if="isOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/40" @click="handleClose"></div>
+  <BaseModal :is-open="isOpen" title="Nuovo Appuntamento" @close="$emit('close')">
+    <div>
+      <label class="block text-sm font-semibold text-gray-700 mb-1"> Cliente <span class="text-red-500">*</span> </label>
+      <select v-model="selectedClientId" class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-300 focus:border-pink-300 outline-none bg-surface">
+        <option value="" disabled>Seleziona un cliente</option>
+        <option v-for="client in clients" :key="client.id" :value="client.id">{{ client.name }} {{ client.surname }}</option>
+      </select>
+      <button @click="$emit('addNewClient')" class="mt-2 text-sm text-primary hover:text-pink-500 flex items-center"><span class="mr-1">+</span> Aggiungi nuovo cliente</button>
+    </div>
 
-        <transition name="modal">
-          <div class="relative max-w-lg bg-surface rounded-2xl shadow-2xl overflow-hidden">
-            <div class="flex justify-between p-6 border-b border-gray-200 bg-gray-50">
-              <h2 class="text-xl font-bold text-gray-800">Nuovo Appuntamento</h2>
-              <button @click="handleClose" class="text-gray-400 cursor-pointer hover:text-pink transition-colors">
-                <!-- Icon X -->
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
+    <div>
+      <label class="block text-sm font-semibold text-gray-700 mb-1"> Trattamenti <span class="text-red-500">*</span> </label>
+      <!-- SELECT TRATTAMENTI -->
+      <div class="space-y-3 mb-3">
+        <div v-for="(treatment, index) in selectedTreatments" :key="treatment.id" class="flex">
+          <select v-model="treatment.treatmentId" class="flex-1 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-300 focus:border-pink-300 outline-none bg-surface">
+            <option value="" disabled>Seleziona un trattamento</option>
+            <option v-for="t in availableTreatments" :key="t.id" :value="t.id" :disabled="!t.is_active" :class="!t.is_active ? 'text-gray-400 bg-gray-50' : 'text-gray-900'">
+              {{ t.name }}
+            </option>
+          </select>
 
-            <div class="p-6 overflow-y-auto space-y-6">
-              <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1"> Cliente <span class="text-red-500">*</span> </label>
-                <select v-model="selectedClientId" class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-300 focus:border-pink-300 outline-none bg-surface">
-                  <option value="" disabled>Seleziona un cliente</option>
-                  <option v-for="client in clients" :key="client.id" :value="client.id">{{ client.name }} {{ client.surname }}</option>
-                </select>
-                <button @click="$emit('addNewClient')" class="mt-2 text-sm text-primary hover:text-pink-500 flex items-center"><span class="mr-1">+</span> Aggiungi nuovo cliente</button>
-              </div>
-
-              <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1"> Trattamenti <span class="text-red-500">*</span> </label>
-                <!-- SELECT TRATTAMENTI -->
-                <div class="space-y-3 mb-3">
-                  <div v-for="(treatment, index) in selectedTreatments" :key="treatment.id" class="flex">
-                    <select v-model="treatment.treatmentId" class="flex-1 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-300 focus:border-pink-300 outline-none bg-surface">
-                      <option value="" disabled>Seleziona un trattamento</option>
-                      <option v-for="t in availableTreatments" :key="t.id" :value="t.id" :disabled="!t.is_active" :class="!t.is_active ? 'text-gray-400 bg-gray-50' : 'text-gray-900'">
-                        {{ t.name }}
-                      </option>
-                    </select>
-
-                    <button v-if="selectedTreatments.length > 1" @click="removeTreatment(index)" class="ms-2 p-2 text-gray-400 hover:text-red-500 transition-colors rounded-lg hover:bg-red-50">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="20"
-                        height="20"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <path d="M3 6h18" />
-                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                        <line x1="10" x2="10" y1="11" y2="17" />
-                        <line x1="14" x2="14" y1="11" y2="17" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-
-                <button @click="addTreatment" class="w-full py-2.5 bg-pink-50 shadow-sm border border-pink-200 text-primary font-medium rounded-lg hover:bg-pink-100 transition-colors">
-                  <span class="text-lg">+</span> Aggiungi un altro trattamento
-                </button>
-              </div>
-
-              <div class="grid grid-cols-3 gap-4">
-                <div>
-                  <label class="block text-sm font-semibold text-gray-700 mb-1"> Data <span class="text-red-500">*</span> </label>
-                  <input type="date" v-model="date" class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-300 focus:border-pink-300 outline-none" />
-                </div>
-                <div>
-                  <label class="block text-sm font-semibold text-gray-700 mb-1"> Ora Inizio <span class="text-red-500">*</span> </label>
-                  <input type="time" v-model="startTime" class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-300 focus:border-pink-300 outline-none" />
-                </div>
-                <div>
-                  <label class="block text-sm font-semibold text-gray-700 mb-1"> Ora Fine <span class="text-red-500">*</span> </label>
-                  <input type="time" v-model="endTime" readonly class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-300 focus:border-pink-300 outline-none" />
-                </div>
-              </div>
-
-              <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">Note</label>
-                <textarea
-                  v-model="notes"
-                  rows="2"
-                  placeholder="Note aggiuntive..."
-                  class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-300 focus:border-pink-300 outline-none"></textarea>
-              </div>
-            </div>
-
-            <div class="p-6 border-t border-gray-200 flex justify-end space-x-3 bg-gray-50 rounded-b-2xl">
-              <button @click="handleClose" class="px-5 py-2.5 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-100 transition-colors bg-white shadow-sm">Annulla</button>
-              <button @click="handleSave" class="px-5 py-2.5 font-medium rounded-xl bg-primary hover:bg-primary/70 transition-colors shadow-sm">Crea Appuntamento</button>
-            </div>
-          </div>
-        </transition>
+          <button v-if="selectedTreatments.length > 1" @click="removeTreatment(index)" class="ms-2 p-2 text-gray-400 hover:text-red-500 transition-colors rounded-lg hover:bg-red-50">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 6h18" />
+              <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+              <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+              <line x1="10" x2="10" y1="11" y2="17" />
+              <line x1="14" x2="14" y1="11" y2="17" />
+            </svg>
+          </button>
+        </div>
       </div>
-    </transition>
-  </Teleport>
+
+      <button @click="addTreatment" class="w-full py-2.5 bg-pink-50 shadow-sm border border-pink-200 text-primary font-medium rounded-lg hover:bg-pink-100 transition-colors">
+        <span class="text-lg">+</span> Aggiungi un altro trattamento
+      </button>
+    </div>
+
+    <div class="grid grid-cols-3 gap-4">
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1"> Data <span class="text-red-500">*</span> </label>
+        <input type="date" v-model="date" class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-300 focus:border-pink-300 outline-none" />
+      </div>
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1"> Ora Inizio <span class="text-red-500">*</span> </label>
+        <input type="time" v-model="startTime" class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-300 focus:border-pink-300 outline-none" />
+      </div>
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1"> Ora Fine <span class="text-red-500">*</span> </label>
+        <input type="time" v-model="endTime" readonly class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-300 focus:border-pink-300 outline-none" />
+      </div>
+    </div>
+
+    <div>
+      <label class="block text-sm font-semibold text-gray-700 mb-1">Note</label>
+      <textarea
+        v-model="notes"
+        rows="2"
+        placeholder="Note aggiuntive..."
+        class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-300 focus:border-pink-300 outline-none"></textarea>
+    </div>
+
+    <template #footer>
+      <button @click="$emit('close')" class="px-5 py-2.5 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-100 transition-colors bg-white shadow-sm">Annulla</button>
+      <button @click="handleSave" class="px-5 py-2.5 font-medium rounded-xl bg-primary hover:bg-primary/70 transition-colors shadow-sm">Crea Appuntamento</button>
+    </template>
+  </BaseModal>
 </template>
-
-<style scoped>
-.overlay-enter-active,
-.overlay-leave-active {
-  transition: opacity 0.18s ease;
-}
-
-.overlay-enter-from,
-.overlay-leave-to {
-  opacity: 0;
-}
-
-.modal-enter-active,
-.modal-leave-active {
-  transition:
-    opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.modal-enter-from,
-.modal-leave-to {
-  opacity: 0;
-  transform: translateY(12px) scale(0.98);
-}
-</style>
