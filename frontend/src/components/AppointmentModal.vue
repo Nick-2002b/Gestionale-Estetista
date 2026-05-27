@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
+import { api } from "../utils/axios";
+import { calculateEndTime } from "../utils/timeCalculator";
 
 const props = defineProps<{
   isOpen: boolean;
@@ -7,7 +9,7 @@ const props = defineProps<{
 
 const emit = defineEmits(["close", "save", "addNewClient"]);
 
-const selectedClientId = ref("");
+const selectedClientId = ref<number | null>(null);
 const date = ref("");
 const startTime = ref("");
 const endTime = ref("");
@@ -15,41 +17,69 @@ const notes = ref("");
 
 interface TreatmentSelection {
   id: number;
-  treatmentId: string;
+  treatmentId: number | "";
   is_active?: boolean;
 }
 
+interface ClientOption {
+  id: number;
+  name: string;
+  surname: string;
+}
+
+interface TreatmentOption {
+  id: number;
+  name: string;
+  duration: number;
+  is_active: number;
+}
+
+const clients = ref<ClientOption[]>([]);
+const availableTreatments = ref<TreatmentOption[]>([]);
+const selectedTreatments = ref<TreatmentSelection[]>([{ id: Date.now(), treatmentId: "" }]);
+
+const totalDuration = computed(() => {
+  return selectedTreatments.value.reduce((sum, selectedTreatment) => {
+    const treatment = availableTreatments.value.find((item) => item.id === selectedTreatment.treatmentId);
+    return sum + (treatment?.duration ?? 0);
+  }, 0);
+});
+
+const syncEndTime = () => {
+  endTime.value = calculateEndTime(startTime.value, totalDuration.value);
+};
+
+const loadFormData = async () => {
+  const [clientsResponse, treatmentsResponse] = await Promise.all([api.get("/clients"), api.get("/treatments")]);
+
+  clients.value = clientsResponse.data.clients ?? [];
+  availableTreatments.value = treatmentsResponse.data.treatments ?? [];
+};
+
 watch(
   () => props.isOpen,
-  (isNowOpen) => {
+  async (isNowOpen) => {
     if (isNowOpen) {
       const today = new Date();
 
       date.value = today.toISOString().split("T")[0];
 
-      selectedClientId.value = "";
+      selectedClientId.value = null;
       startTime.value = "";
       endTime.value = "";
       notes.value = "";
       selectedTreatments.value = [{ id: Date.now(), treatmentId: "" }];
+
+      try {
+        await loadFormData();
+      } catch (error) {
+        console.error("Errore caricamento clienti/trattamenti:", error);
+      }
     }
   },
 );
-const selectedTreatments = ref<TreatmentSelection[]>([{ id: Date.now(), treatmentId: "" }]);
 
-// dati mockati MOMENTANEI
-const clients = ref([
-  { id: "1", name: "Giulia Rossi" },
-  { id: "2", name: "Sofia Conti" },
-  { id: "3", name: "Luca Ferri" },
-]);
-
-const availableTreatments = ref([
-  { id: "t1", name: "Taglio Donna", is_active: true },
-  { id: "t2", name: "Piega", is_active: true },
-  { id: "t3", name: "Pulizia Viso Profonda", is_active: false },
-  { id: "t4", name: "Massaggio Rilassante", is_active: true },
-]);
+watch([startTime, totalDuration], syncEndTime, { immediate: true });
 
 const addTreatment = () => {
   selectedTreatments.value.push({ id: Date.now(), treatmentId: "" });
@@ -66,7 +96,7 @@ const handleClose = () => {
 const handleSave = () => {
   const payload = {
     clientId: selectedClientId.value,
-    treatments: selectedTreatments.value.map((t) => t.treatmentId).filter((id) => id !== ""),
+    treatments: selectedTreatments.value.map((t) => t.treatmentId).filter((id): id is number => typeof id === "number"),
     date: date.value,
     startTime: startTime.value,
     endTime: endTime.value,
@@ -102,9 +132,7 @@ const handleSave = () => {
               <label class="block text-sm font-semibold text-gray-700 mb-1"> Cliente <span class="text-red-500">*</span> </label>
               <select v-model="selectedClientId" class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-300 focus:border-pink-300 outline-none bg-surface">
                 <option value="" disabled>Seleziona un cliente</option>
-                <option v-for="client in clients" :key="client.id" :value="client.id">
-                  {{ client.name }}
-                </option>
+                <option v-for="client in clients" :key="client.id" :value="client.id">{{ client.name }} {{ client.surname }}</option>
               </select>
               <button @click="$emit('addNewClient')" class="mt-2 text-sm text-primary hover:text-pink-500 flex items-center"><span class="mr-1">+</span> Aggiungi nuovo cliente</button>
             </div>
@@ -158,7 +186,7 @@ const handleSave = () => {
               </div>
               <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-1"> Ora Fine <span class="text-red-500">*</span> </label>
-                <input type="time" v-model="endTime" class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-300 focus:border-pink-300 outline-none" />
+                <input type="time" v-model="endTime" readonly class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-300 focus:border-pink-300 outline-none" />
               </div>
             </div>
 
