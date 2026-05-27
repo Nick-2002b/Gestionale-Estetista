@@ -39,3 +39,10 @@
 .fc-theme-standard .fc-scrollgrid {
   border: none;
 }
+
+.fc .fc-timegrid-event,
+.fc .fc-daygrid-event,
+.fc .fc-h-event,
+.fc .fc-v-event {
+  box-shadow: none;
+}
