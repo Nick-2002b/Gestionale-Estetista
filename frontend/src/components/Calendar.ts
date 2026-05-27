@@ -21,8 +21,8 @@ export function useCalendar() {
     },
     headerToolbar: false,
 
-    slotDuration: "00:10:00", // Righe create ogni 10 min
-    slotLabelInterval: "00:30:00", // Test dell'ora stampato solo ogni
+    slotDuration: "00:05:00", // Righe create ogni 10 min
+    slotLabelInterval: "00:30:00", // Testo dell'ora stampato solo ogni
     titleFormat: { year: "numeric", month: "long", day: "numeric", weekday: "long" },
     dayHeaderFormat: { weekday: "short", day: "numeric" },
     slotLabelFormat: { hour: "2-digit", minute: "2-digit", hour12: false },
@@ -31,6 +31,12 @@ export function useCalendar() {
     slotMaxTime: "20:00:00",
     allDaySlot: false,
     expandRows: true,
+    // eventMinHeight: 45,
+
+    eventBackgroundColor: "transparent",
+    eventBorderColor: "transparent",
+
+    selectable: true,
 
     events: [],
   });

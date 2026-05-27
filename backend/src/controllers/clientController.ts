@@ -4,7 +4,15 @@ import { getDb } from "../config/database.js";
 export const getAllClients = async (req: Request, res: Response): Promise<void> => {
   try {
     const db = await getDb();
-    const clients = await db.all("SELECT * FROM clients ORDER BY surname ASC, name ASC");
+    const clients = await db.all(`
+      SELECT 
+        c.id, c.name, c.surname, c.sex, c.phone, c.email, c.notes, c.created_at,
+        COUNT(a.id) as appointment_count
+      FROM clients c
+      JOIN appointments a ON c.id = a.client_id
+      GROUP BY c.id
+      ORDER BY c.name ASC, c.surname ASC
+    `);
     res.status(200).json({ clients });
   } catch (error) {
     console.error("Errore recupero clienti:", error);
