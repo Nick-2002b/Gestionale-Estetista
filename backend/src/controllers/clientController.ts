@@ -46,3 +46,22 @@ export const createClient = async (req: Request, res: Response): Promise<void> =
     res.status(500).json({ error: "Server Error" });
   }
 };
+
+export const deleteClient = async (req: Request, res: Response): Promise<void> => {
+  const db = await getDb();
+  const clientId = req.params.id;
+
+  try {
+    const result = await db.run("DELETE FROM clients WHERE id = ?", { clientId });
+
+    if (result.changes === 0) {
+      res.status(404).json({ error: "Cliente non trovato" });
+      return;
+    }
+
+    res.status(200).json({ message: "Cliente eliminato con successo" });
+  } catch (error) {
+    console.error("Errore durante l'eliminazione del cliente:", error);
+    res.status(500).json({ error: "Server Error" });
+  }
+};
