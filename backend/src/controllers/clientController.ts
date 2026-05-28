@@ -24,7 +24,7 @@ export const createClient = async (req: Request, res: Response): Promise<void> =
   try {
     const { name, surname, sex, birth_date, phone, email, notes } = req.body;
 
-    if (!name || !surname || !birth_date) {
+    if (!name || !surname) {
       res.status(400).json({ error: "Nome, cognome e data di nascita sono obbligatori" });
       return;
     }
@@ -70,6 +70,35 @@ export const deleteClient = async (req: Request, res: Response): Promise<void> =
     res.status(200).json({ message: "Cliente eliminato con successo" });
   } catch (error) {
     console.error("Errore durante l'eliminazione del cliente:", error);
+    res.status(500).json({ error: "Server Error" });
+  }
+};
+
+export const editClient = async (req: Request, res: Response): Promise<void> => {
+  const db = await getDb();
+  const clientId = req.params.id;
+
+  try {
+    const { name, surname, sex, birth_date, phone, email, notes } = req.body;
+
+    if (!name || !surname) {
+      res.status(400).json({ error: "Nome e cognome sono obbligatori" });
+      return;
+    }
+    const result = await db.run(
+      `
+      UPDATE clients 
+      SET name = ?, surname = ?, sex = ?, birth_date = ?, phone = ?, email = ?, notes = ? WHERE id = ?`,
+      [name, surname, sex ?? null, birth_date ?? null, phone ?? null, email ?? null, notes ?? null, clientId],
+    );
+
+    if (result.changes === 0) {
+      res.status(404).json({ error: "Cliente non trovato" });
+      return;
+    }
+    res.status(200).json({ message: "Cliente aggiornato con successo" });
+  } catch (error) {
+    console.error("Errore durante l'aggiornamento del cliente:", error);
     res.status(500).json({ error: "Server Error" });
   }
 };
