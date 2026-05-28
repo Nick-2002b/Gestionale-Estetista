@@ -56,6 +56,19 @@ export const useClientStore = defineStore("clients", () => {
       isLoading.value = false;
     }
   };
+
+  const editClient = async (id: number, payload: Record<string, any>) => {
+    try {
+      isLoading.value = true;
+      await api.post(`/clients/${id}`, payload);
+      await fetchClients();
+    } catch (error) {
+      console.error("Errore durante l'aggiornamento del cliente:", error);
+      throw error;
+    } finally {
+      isLoading.value = false;
+    }
+  };
   return {
     clientsList,
     isLoading,
