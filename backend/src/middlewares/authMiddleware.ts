@@ -8,11 +8,7 @@ interface DecodedToken {
   exp: number;
 }
 
-export const authenticateJWT = (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): void => {
+export const authenticateJWT = (req: Request, res: Response, next: NextFunction): void => {
   const token = req.cookies.jwt;
 
   if (!token) {
