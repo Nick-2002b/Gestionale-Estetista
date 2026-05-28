@@ -9,7 +9,7 @@ export const getAllClients = async (req: Request, res: Response): Promise<void> 
         c.id, c.name, c.surname, c.sex, c.phone, c.email, c.notes, c.created_at,
         COUNT(a.id) as appointment_count
       FROM clients c
-      JOIN appointments a ON c.id = a.client_id
+      LEFT JOIN appointments a ON c.id = a.client_id
       GROUP BY c.id
       ORDER BY c.name ASC, c.surname ASC
     `);
