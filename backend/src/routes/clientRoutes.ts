@@ -8,7 +8,7 @@ router.use(authenticateJWT);
 
 router.get("/", getAllClients);
 router.post("/", createClient);
-router.post("/", deleteClient);
-router.post("/", editClient);
+router.delete("/:id", deleteClient);
+router.post("/:id", editClient);
 
 export default router;
