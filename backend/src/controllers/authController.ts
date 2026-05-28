@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { UserModel } from "../models/User.js";
+import { UserModel } from "./userController.js";
 
 const cookieOptions = {
   httpOnly: true,
