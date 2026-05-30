@@ -113,10 +113,10 @@ const getInitials = (name: string, surname: string) => {
             <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
-            <input v-model="searchQuery" type="text" placeholder="Cerca per nome, email o telefono" class="w-full pl-10 pr-4 py-2 bg-white border border-gray-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-pink-light transition-shadow" />
+            <input v-model="searchQuery" type="search" placeholder="Cerca per nome, email o telefono" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-pink-light transition-shadow" />
           </div>
 
-          <select v-model="sortBy" class="bg-surface border border-gray-300 rounded-full px-4 text-sm focus:outline-none focus:ring-2 focus:ring-pink-light cursor-pointer">
+          <select v-model="sortBy" class="bg-surface border border-gray-300 rounded-full shadow-sm px-4 text-sm focus:outline-none focus:ring-2 focus:ring-pink-light cursor-pointer">
             <option value="name">Ordina: Nome</option>
             <option value="recent">Ordina: Più recenti</option>
             <option value="appointments">Ordina: Più appuntamenti</option>
@@ -124,19 +124,76 @@ const getInitials = (name: string, surname: string) => {
         </div>
       </div>
 
-      <div>
-        <table class="w-full text-left overflow-hidden rounded-3xl">
+      <div class="overflow-hidden rounded-3xl border border-gray-300 shadow-sm">
+        <table class="w-full text-left">
           <thead>
             <tr class="bg-gray-50 border-b border-gray-200 text-sm text-gray-500">
               <th class="py-3 px-6 font-semibold">Cliente</th>
               <th class="py-3 px-6 font-semibold">Contatti</th>
               <th class="py-3 px-6 font-semibold text-center">Sesso</th>
               <th class="py-3 px-6 font-semibold text-center">Appuntamenti</th>
-              <th class="py-3 px-6 font-semibold text-right">Azioni</th>
+              <th class="py-3 px-6 font-semibold text-center">Azioni</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
-            <tr v-for="client in filteredAndSortedClients" :key="client.id" class="hover:bg-gray-100/50 transition-colors"></tr>
+            <tr v-for="client in filteredAndSortedClients" :key="client.id" class="hover:bg-gray-100/50 transition-colors">
+              <!-- Colonna Cliente -->
+              <td class="py-4 px-4 flex">
+                <div class="h-10 w-10 flex rounded-full bg-pink-100 justify-center items-center font-bold text-sm">
+                  {{ getInitials(client.name, client.surname) }}
+                </div>
+                <div class="ms-3">
+                  <div class="font-bold">{{ client.name }} {{ client.surname }}</div>
+                  <div class="text-xs text-gray-500">Cliente dal {{ client.created_at }}</div>
+                </div>
+              </td>
+
+              <!-- Colonna Contatti -->
+              <td class="space-y-1">
+                <div class="flex items-center text-sm text-gray-600">
+                  <svg class="w-3.5 h-3.5 mr-2 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                  </svg>
+                  {{ client.phone }}
+                </div>
+                <div class="flex items-center text-sm text-gray-600">
+                  <svg class="w-3.5 h-3.5 mr-2 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  {{ client.email }}
+                </div>
+              </td>
+              <!-- Colonna Sesso -->
+              <td class="text-center">
+                <span class="inline-flex justify-center border border-gray-200 rounded-full text-xs h-6 w-6 items-center shadow-sm">{{ client.sex }}</span>
+              </td>
+              <!-- Colonna Totale appuntamenti -->
+              <td class="text-center">
+                <span class="inline-flex items-center bg-pink-50 rounded-full px-2 py-1">
+                  <svg class="w-3.5 h-3.5 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  {{ client.appointment_count }}
+                </span>
+              </td>
+              <!-- Colonna Bottoni azioni -->
+              <td class="text-center">
+                <button @click="editClient(client.id)" class="text-gray-400 hover:text-gray-900 transition-colors rounded-lg p-1 hover:bg-pink-100">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block" fill="none" viewBox="0 2 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  </svg>
+                </button>
+                <button @click="deleteClient(client.id)" class="text-red-400 hover:text-red-600 hover:bg-red-50 p-1 rounded-lg transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block" fill="none" viewBox="0 2 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </td>
+            </tr>
 
             <tr v-if="filteredAndSortedClients.length === 0">
               <td colspan="5" class="py-12 text-center text-gray-500">Nessun cliente trovato con i filtri attuali.</td>
