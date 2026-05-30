@@ -75,5 +75,6 @@ export const useClientStore = defineStore("clients", () => {
     fetchClients,
     createClient,
     deleteClient,
+    editClient,
   };
 });
