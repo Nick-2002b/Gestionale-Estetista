@@ -60,7 +60,7 @@ export const deleteClient = async (req: Request, res: Response): Promise<void> =
   const clientId = req.params.id;
 
   try {
-    const result = await db.run("DELETE FROM clients WHERE id = ?", { clientId });
+    const result = await db.run("DELETE FROM clients WHERE id = ?", [clientId]);
 
     if (result.changes === 0) {
       res.status(404).json({ error: "Cliente non trovato" });
