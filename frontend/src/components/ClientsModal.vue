@@ -2,8 +2,20 @@
 import { ref, watch } from "vue";
 import BaseModal from "./BaseModal.vue";
 
+type ClientForm = {
+  name: string;
+  surname: string;
+  sex: "F" | "M" | "Altro";
+  birth_date: string;
+  phone: string;
+  email: string;
+  notes: string;
+};
+
 const props = defineProps<{
   isOpen: boolean;
+  isEditing?: boolean;
+  client?: ClientForm;
 }>();
 
 const emit = defineEmits(["close", "save"]);
@@ -16,31 +28,54 @@ const phone = ref("");
 const email = ref("");
 const notes = ref("");
 
+const resetFields = () => {
+  name.value = "";
+  surname.value = "";
+  sex.value = "";
+  birthDate.value = "";
+  phone.value = "";
+  email.value = "";
+  notes.value = "";
+};
+
+const fillFields = (client?: ClientForm) => {
+  if (!client) {
+    resetFields();
+    return;
+  }
+
+  name.value = client.name ?? "";
+  surname.value = client.surname ?? "";
+  sex.value = client.sex ?? "";
+  birthDate.value = client.birth_date ?? "";
+  phone.value = client.phone ?? "";
+  email.value = client.email ?? "";
+  notes.value = client.notes ?? "";
+};
+
 watch(
   () => props.isOpen,
-  (isNowOpen) => {
-    if (isNowOpen) {
-      name.value = "";
-      surname.value = "";
-      sex.value = "";
-      birthDate.value = "";
-      phone.value = "";
-      email.value = "";
-      notes.value = "";
+  (isOpen) => {
+    if (isOpen) {
+      fillFields(props.client);
+      return;
     }
+
+    resetFields();
   },
+  { immediate: true },
 );
 
-const handleSave = async () => {
+const handleSave = () => {
   if (!name.value || !surname.value) {
     alert("I campi Nome e Cognome sono obbligatori.");
     return;
   }
 
-  const payload = {
+  const payload: ClientForm = {
     name: name.value,
     surname: surname.value,
-    sex: sex.value,
+    sex: sex.value as "F" | "M" | "Altro",
     birth_date: birthDate.value,
     phone: phone.value,
     email: email.value,
@@ -52,7 +87,7 @@ const handleSave = async () => {
 </script>
 
 <template>
-  <BaseModal :is-open="isOpen" title="Nuovo Cliente" @close="$emit('close')">
+  <BaseModal :is-open="isOpen" :title="isEditing ? 'Modifica Cliente' : 'Nuovo Cliente'" @close="$emit('close')">
     <div class="space-y-4">
       <div class="grid grid-cols-2 gap-4">
         <div>
@@ -88,30 +123,20 @@ const handleSave = async () => {
       <div class="grid grid-cols-1 gap-4">
         <div>
           <label class="block text-sm font-semibold text-gray-700 mb-1"> Email </label>
-          <input
-            type="email"
-            v-model="email"
-            class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-300 focus:border-pink-300 outline-none"
-            placeholder="email@esempio.com" />
+          <input type="email" v-model="email" class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-300 focus:border-pink-300 outline-none" placeholder="email@esempio.com" />
         </div>
       </div>
 
       <div>
         <label class="block text-sm font-semibold text-gray-700 mb-1">Note</label>
-        <textarea
-          v-model="notes"
-          rows="3"
-          placeholder="Note, preferenze o informazioni mediche rilevanti..."
-          class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-300 focus:border-pink-300 outline-none"></textarea>
+        <textarea v-model="notes" rows="3" placeholder="Note, preferenze o informazioni mediche rilevanti..." class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-300 focus:border-pink-300 outline-none"></textarea>
       </div>
     </div>
 
     <template #footer>
-      <button @click="$emit('close')" class="px-5 py-2.5 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-100 transition-colors bg-white shadow-sm disabled:opacity-50">
-        Annulla
-      </button>
+      <button @click="$emit('close')" class="px-5 py-2.5 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-100 transition-colors bg-white shadow-sm disabled:opacity-50">Annulla</button>
       <button @click="handleSave" class="px-5 py-2.5 font-medium rounded-xl bg-primary hover:bg-primary/70 transition-colors shadow-sm disabled:opacity-50 inline-flex items-center">
-        Crea Cliente
+        {{ isEditing ? "Salva Modifiche" : "Crea Cliente" }}
       </button>
     </template>
   </BaseModal>
