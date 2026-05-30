@@ -6,6 +6,7 @@ import { useCalendar } from "../components/Calendar.ts";
 import PageHeader from "../components/ViewHeader.vue";
 import AppointmentModal from "../components/AppointmentModal.vue";
 import { useAppointmentStore } from "../stores/appointments";
+import ConfirmDialog from "../components/ConfirmDialog.vue";
 
 const appointmentStore = useAppointmentStore();
 
@@ -31,14 +32,20 @@ const closeContextMenu = () => {
 
 const handleDeleteAppointment = async () => {
   if (!contextMenu.value.eventId) return;
-  if (confirm("Sei sicuro di voler eliminare questo appuntamento?")) {
-    try {
-      await appointmentStore.deleteAppointment(contextMenu.value.eventId);
-    } catch (error) {
-      alert("Errore durante l'eliminazione");
-    }
+  try {
+    await appointmentStore.deleteAppointment(contextMenu.value.eventId);
+  } catch (error) {
+    alert("Errore durante l'eliminazione");
   }
   closeContextMenu();
+  isConfirmOpen.value = false;
+};
+const askDelete = () => {
+  isConfirmOpen.value = true;
+};
+
+const cancelDelete = () => {
+  isConfirmOpen.value = false;
 };
 
 onMounted(() => {
@@ -87,6 +94,7 @@ const handleSaveAppointment = async (payload: any) => {
 const currentTitle = ref("");
 const currentView = ref("timeGridWeek");
 const isModalOpen = ref(false);
+const isConfirmOpen = ref(false);
 
 const viewModes = [
   { label: "Giorno", value: "timeGridDay" },
@@ -152,11 +160,8 @@ onUnmounted(() => {
 <template>
   <div class="space-y-4 relative">
     <!-- Menu Contestuale (Click Destro) -->
-    <div
-      v-if="contextMenu.visible"
-      :style="{ top: `${contextMenu.y}px`, left: `${contextMenu.x}px` }"
-      class="fixed z-50 bg-white border border-gray-200 rounded-full shadow-sm w-32 m-0 overflow-hidden">
-      <button @click.stop="handleDeleteAppointment" class="text-left w-full p-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 transition-colors cursor-pointer">
+    <div v-if="contextMenu.visible" :style="{ top: `${contextMenu.y}px`, left: `${contextMenu.x}px` }" class="fixed z-50 bg-white border border-gray-200 rounded-full shadow-sm w-32 m-0 overflow-hidden">
+      <button @click="askDelete" class="text-left w-full p-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 transition-colors cursor-pointer">
         <svg xmlns="http://www.w3.org/2000/svg" width="15" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M3 6h18" />
           <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
@@ -170,45 +175,21 @@ onUnmounted(() => {
 
     <PageHeader title="Agenda" button-text="Nuovo Appuntamento" @action="handleAddAppointment" />
     <AppointmentModal :is-open="isModalOpen" @close="handleCloseAppointmentModal" @save="handleSaveAppointment" />
-
+    <ConfirmDialog :is-open="isConfirmOpen" title="Elimina Appuntamento" message="Sei sicuro di voler eliminare questo appuntamento?" @confirm="handleDeleteAppointment" @cancel="cancelDelete" />
     <div class="flex flex-col md:flex-row md:items-center md:justify-between">
       <div class="flex p-1 items-center rounded-full shadow-sm border border-gray-200 space-x-1 me-3">
         <button @click="goPrev" class="p-2 text-gray-600 transition-colors rounded-full hover:bg-pink-light cursor-pointer">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="h-4 w-4"
-            aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true">
             <path d="m15 18-6-6 6-6"></path>
           </svg>
         </button>
         <button @click="goNext" class="p-2 text-gray-600 transition-colors rounded-full hover:bg-pink-light cursor-pointer">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="h-4 w-4"
-            aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true">
             <path d="m9 18 6-6-6-6"></path>
           </svg>
         </button>
       </div>
-      <button @click="goToday" class="px-4 py-2 bg-surface border border-gray-200 rounded-full shadow-sm hover:bg-pink-light text-sm font-medium text-gray-700 transition-colors cursor-pointer">
-        Oggi
-      </button>
+      <button @click="goToday" class="px-4 py-2 bg-surface border border-gray-200 rounded-full shadow-sm hover:bg-pink-light text-sm font-medium text-gray-700 transition-colors cursor-pointer">Oggi</button>
 
       <h2 class="w-full text-center text-2xl font-bold text-text-main capitalize">
         {{ currentTitle }}
@@ -216,14 +197,7 @@ onUnmounted(() => {
 
       <div class="flex bg-gray-100 border border-gray-200 rounded-full shadow-sm">
         <div class="flex p-1 space-x-2">
-          <button
-            v-for="viewMode in viewModes"
-            :key="viewMode.value"
-            @click="changeView(viewMode.value)"
-            :class="[
-              'px-4 py-1 text-sm font-medium rounded-full transition-all cursor-pointer',
-              currentView === viewMode.value ? 'bg-surface shadow-sm text-gray-900' : 'text-gray-500 hover:bg-gray-200',
-            ]">
+          <button v-for="viewMode in viewModes" :key="viewMode.value" @click="changeView(viewMode.value)" :class="['px-4 py-1 text-sm font-medium rounded-full transition-all cursor-pointer', currentView === viewMode.value ? 'bg-surface shadow-sm text-gray-900' : 'text-gray-500 hover:bg-gray-200']">
             {{ viewMode.label }}
           </button>
         </div>
