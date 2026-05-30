@@ -31,6 +31,7 @@ export function useCalendar() {
     slotMaxTime: "20:00:00",
     allDaySlot: false,
     expandRows: true,
+    height: "100%",
     // eventMinHeight: 45,
 
     eventBackgroundColor: "transparent",
