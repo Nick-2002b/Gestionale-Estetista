@@ -132,3 +132,19 @@ export const editTreatment = async (req: Request, res: Response): Promise<void> 
     res.status(500).json({ error: "Server Error" });
   }
 };
+
+export const deleteTreatment = async (req: Request, res: Response): Promise<void> => {
+  const db = await getDb();
+  const treatmentId = req.params.id;
+
+  try {
+    const result = await db.run("DELETE FROM treatments WHERE id = ?", [treatmentId]);
+    if (result.changes === 0) {
+      res.status(404).json({ error: "Trattamento non trovato" });
+      return;
+    }
+    res.status(200).json({ message: "Trattamento eliminato con successo" });
+  } catch (error) {
+    res.status(500).json({ error: "Server Error" });
+  }
+};
