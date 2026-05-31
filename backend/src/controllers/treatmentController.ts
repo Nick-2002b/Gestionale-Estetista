@@ -21,12 +21,50 @@ export const getCategories = async (req: Request, res: Response): Promise<void> 
   try {
     const db = await getDb();
     const categories = await db.all(`
-      SELECT * 
-      FROM categories
-      ORDER BY name ASC`);
+      SELECT c.*, COUNT(t.id) as treatments_count
+      FROM categories c
+      LEFT JOIN treatments t ON c.id = t.category_id
+      GROUP BY c.id
+      ORDER BY c.name ASC`);
     res.status(200).json({ categories });
   } catch (error) {
     res.status(500).json({ error: "Server Error" });
+  }
+};
+
+export const editCategory = async (req: Request, res: Response): Promise<void> => {
+  const db = await getDb();
+  const categoryId = req.params.id;
+  try {
+    const name = req.body;
+    if (!name) {
+      res.status(400).json({ error: "Il nome della categoria è obbligatorio" });
+      return;
+    }
+    const result = await db.run(`UPDATE categories SET name = ? WHERE id = ?`, [name, categoryId]);
+    if (result.changes === 0) {
+      res.status(404).json({ error: "Categoria non trovata" });
+      return;
+    }
+    res.status(200).json({ message: "Categoria aggiornata con successo" });
+  } catch (error) {
+    res.status(500).json({ error: "Server Error" });
+  }
+};
+
+export const deleteCategory = async (req: Request, res: Response): Promise<void> => {
+  const db = await getDb();
+  const categoryId = req.params.id;
+
+  try {
+    const result = await db.run("DELETE FROM categories WHERE id = ?", [categoryId]);
+    if (result.changes === 0) {
+      res.status(404).json({ error: "Categoria non trovata" });
+      return;
+    }
+    res.status(200).json({ message: "Categoria eliminata con successo" });
+  } catch (error) {
+    res.status(500).json({ error: "Server error" });
   }
 };
 
