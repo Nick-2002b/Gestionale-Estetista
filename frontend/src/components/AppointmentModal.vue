@@ -6,6 +6,7 @@ import { calculateEndTime } from "../utils/timeCalculator";
 
 const props = defineProps<{
   isOpen: boolean;
+  refreshKey?: number;
 }>();
 
 const emit = defineEmits(["close", "save", "addNewClient"]);
@@ -82,6 +83,19 @@ watch(
 
 watch([startTime, totalDuration], syncEndTime, { immediate: true });
 
+watch(
+  () => props.refreshKey,
+  async () => {
+    if (!props.isOpen) return;
+
+    try {
+      await loadFormData();
+    } catch (error) {
+      console.error("Errore refresh clienti/trattamenti:", error);
+    }
+  },
+);
+
 const addTreatment = () => {
   selectedTreatments.value.push({ id: Date.now(), treatmentId: "" });
 };
@@ -142,9 +156,7 @@ const handleSave = () => {
         </div>
       </div>
 
-      <button @click="addTreatment" class="w-full py-2.5 bg-pink-50 shadow-sm border border-pink-200 text-primary font-medium rounded-lg hover:bg-pink-100 transition-colors">
-        <span class="text-lg">+</span> Aggiungi un altro trattamento
-      </button>
+      <button @click="addTreatment" class="w-full py-2.5 bg-pink-50 shadow-sm border border-pink-200 text-primary font-medium rounded-lg hover:bg-pink-100 transition-colors"><span class="text-lg">+</span> Aggiungi un altro trattamento</button>
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -164,11 +176,7 @@ const handleSave = () => {
 
     <div>
       <label class="block text-sm font-semibold text-gray-700 mb-1">Note</label>
-      <textarea
-        v-model="notes"
-        rows="2"
-        placeholder="Note aggiuntive..."
-        class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-300 focus:border-pink-300 outline-none"></textarea>
+      <textarea v-model="notes" rows="2" placeholder="Note aggiuntive..." class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-300 focus:border-pink-300 outline-none"></textarea>
     </div>
 
     <template #footer>

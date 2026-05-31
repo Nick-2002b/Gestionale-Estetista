@@ -6,9 +6,22 @@ import { useCalendar } from "../components/Calendar.ts";
 import PageHeader from "../components/ViewHeader.vue";
 import AppointmentModal from "../components/AppointmentModal.vue";
 import { useAppointmentStore } from "../stores/appointments";
+import { useClientStore } from "../stores/clients";
 import ConfirmDialog from "../components/ConfirmDialog.vue";
+import ClientsModal from "../components/ClientsModal.vue";
 
 const appointmentStore = useAppointmentStore();
+const clientStore = useClientStore();
+
+type ClientPayload = {
+  name: string;
+  surname: string;
+  email: string;
+  phone: string;
+  sex: "M" | "F" | "Altro";
+  birth_date: string;
+  notes: string;
+};
 
 const contextMenu = ref({
   visible: false,
@@ -94,7 +107,9 @@ const handleSaveAppointment = async (payload: any) => {
 const currentTitle = ref("");
 const currentView = ref("timeGridWeek");
 const isModalOpen = ref(false);
+const isClientModalOpen = ref(false);
 const isConfirmOpen = ref(false);
+const clientOptionsRefreshKey = ref(0);
 
 const viewModes = [
   { label: "Giorno", value: "timeGridDay" },
@@ -108,6 +123,25 @@ const handleAddAppointment = () => {
 
 const handleCloseAppointmentModal = () => {
   isModalOpen.value = false;
+};
+
+const handleOpenClientModalFromAppointment = () => {
+  isClientModalOpen.value = true;
+};
+
+const handleCloseClientModal = () => {
+  isClientModalOpen.value = false;
+};
+
+const handleSaveClientFromAgenda = async (payload: ClientPayload) => {
+  try {
+    await clientStore.createClient(payload);
+    isClientModalOpen.value = false;
+    clientOptionsRefreshKey.value += 1;
+  } catch (error) {
+    console.error("Errore durante il salvataggio del cliente:", error);
+    alert("Non è stato possibile creare il cliente.");
+  }
 };
 
 const getCalendarApi = () => {
@@ -174,7 +208,8 @@ onUnmounted(() => {
     </div>
 
     <PageHeader title="Agenda" button-text="Nuovo Appuntamento" @action="handleAddAppointment" class="shrink-0" />
-    <AppointmentModal :is-open="isModalOpen" @close="handleCloseAppointmentModal" @save="handleSaveAppointment" />
+    <AppointmentModal :is-open="isModalOpen" :refresh-key="clientOptionsRefreshKey" @close="handleCloseAppointmentModal" @save="handleSaveAppointment" @add-new-client="handleOpenClientModalFromAppointment" />
+    <ClientsModal :is-open="isClientModalOpen" @close="handleCloseClientModal" @save="handleSaveClientFromAgenda" />
     <ConfirmDialog :is-open="isConfirmOpen" title="Elimina Appuntamento" message="Sei sicuro di voler eliminare questo appuntamento?" @confirm="handleDeleteAppointment" @cancel="cancelDelete" />
     <div class="flex flex-col md:flex-row gap-4 md:gap-0 items-center justify-between shrink-0 my-4">
       <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start order-2 md:order-1">
