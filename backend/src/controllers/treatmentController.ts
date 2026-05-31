@@ -47,9 +47,9 @@ export const createCategory = async (req: Request, res: Response): Promise<void>
 
 export const createTreatment = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { name, category, description, duration, price } = req.body;
+    const { name, category_id, description, duration, price } = req.body;
 
-    if (!name || !category || !duration) {
+    if (!name || !category_id || !duration) {
       res.status(400).json({ error: "Nome, categoria e durata sono campi obbligatori" });
       return;
     }
@@ -58,7 +58,7 @@ export const createTreatment = async (req: Request, res: Response): Promise<void
     const result = await db.run(
       `INSERT INTO treatments (name, category_id, description, duration, price, is_active) 
        VALUES (?, ?, ?, ?, ?, 1)`,
-      [name, category, description || null, duration, price || null],
+      [name, category_id, description || null, duration, price || null],
     );
 
     res.status(201).json({
@@ -66,7 +66,7 @@ export const createTreatment = async (req: Request, res: Response): Promise<void
       treatment: {
         id: result.lastID,
         name,
-        category,
+        category_id,
         description,
         duration,
         price,
@@ -119,7 +119,7 @@ export const editTreatment = async (req: Request, res: Response): Promise<void> 
       `
       UPDATE treatments
       SET name = ?, category_id = ?, description = ?, duration = ?, price = ?
-      WHERE id = ?,
+      WHERE id = ?
   `,
       [name, category_id, description || null, duration, price || null, treatmentId],
     );
