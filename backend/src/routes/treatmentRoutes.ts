@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getAllTreatments, createTreatment, toggleTreatmentStatus } from "../controllers/treatmentController.js";
+import { getAllTreatments, createTreatment, toggleTreatmentStatus, getCategories, createCategory, editTreatment } from "../controllers/treatmentController.js";
 import { authenticateJWT } from "../middlewares/authMiddleware.js";
 
 const router = Router();
@@ -8,6 +8,9 @@ router.use(authenticateJWT);
 
 router.get("/", getAllTreatments);
 router.post("/", createTreatment);
-router.patch("/:id/status", toggleTreatmentStatus);
+router.post("/:id/status", toggleTreatmentStatus);
+router.get("/categories", getCategories);
+router.post("/categories", createCategory);
+router.post("/:id", editTreatment);
 
 export default router;

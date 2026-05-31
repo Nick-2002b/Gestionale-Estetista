@@ -54,16 +54,27 @@ export const initDb = async () => {
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
   `);
+
+  const clientsCount = await db.get("SELECT COUNT(*) as count FROM clients");
+  if (clientsCount.count === 0) {
+    await db.exec(`
+      INSERT INTO clients (name, surname, sex, birth_date, phone, email, notes) VALUES
+      ('Giulia', 'Rossi', 'F', '1992-04-10', '+39 333 1111111', 'giulia.rossi@example.com', NULL),
+      ('Sofia', 'Conti', 'F', '1989-09-23', '+39 333 2222222', 'sofia.conti@example.com', NULL),
+      ('Luca', 'Ferri', 'M', '1987-01-15', '+39 333 3333333', 'luca.ferri@example.com', NULL);
+    `);
+  }
   // TABELLA TRATTAMENTI
   await db.exec(`
     CREATE TABLE IF NOT EXISTS treatments (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL,
-      category TEXT NOT NULL,
+      category_id INTEGER NOT NULL,
       duration INTEGER NOT NULL,
       price REAL,
       description TEXT,
-      is_active INTEGER DEFAULT 1
+      is_active INTEGER DEFAULT 1,
+      FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE RESTRICT
     );
   `);
 
@@ -80,7 +91,7 @@ export const initDb = async () => {
     );
   `);
 
-  // Tabella Ponte (Relazione Molti-a-Molti tra Appuntamenti e Trattamenti)
+  // Tabella Ponte (Relazione Molti-a-Molti tra Appuntamenti e Trattamenti
   await db.exec(`
     CREATE TABLE IF NOT EXISTS appointment_treatments (
       appointment_id INTEGER NOT NULL,
@@ -90,5 +101,23 @@ export const initDb = async () => {
       FOREIGN KEY (treatment_id) REFERENCES treatments(id) ON DELETE CASCADE
     );
   `);
+  // TABELLA CATEGORIE
+  await db.exec(`
+  CREATE TABLE IF NOT EXISTS categories (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT UNIQUE NOT NULL
+    );`);
+
+  const treatmentsCount = await db.get("SELECT COUNT(*) as count FROM categories");
+  if (treatmentsCount.count === 0) {
+    await db.exec(`INSERT INTO categories (name) VALUES ('Mani'), ('Viso'), ('Corpo');`);
+    await db.exec(`
+      INSERT INTO treatments (name, category_id, description, duration, price, is_active) VALUES 
+      ('Manicure Classica', 1, 'Trattamento completo unghie naturali.', 45, 25.00, 1),
+      ('Massaggio', 3, '', 15, 55.00, 1),
+      ('Ceretta', 3, 'Ceretta busto', 60, 80.00, 1),
+      ('Baffi', 2, 'ceretta baffi', 10, 55.00, 1);
+    `);
+  }
   console.log("Database Created");
 };
