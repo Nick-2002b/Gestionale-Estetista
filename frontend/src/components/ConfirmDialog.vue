@@ -29,11 +29,11 @@ const emit = defineEmits<{
           <h3 class="text-lg font-bold text-gray-900 mb-2">{{ title }}</h3>
           <p class="text-sm text-gray-500 mb-6">{{ message }}</p>
 
-          <div class="flex justify-center gap-3">
-            <button @click="emit('cancel')" class="flex-1 px-4 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 font-medium rounded-xl transition-colors">
+          <div class="flex flex-col sm:flex-row justify-center gap-3">
+            <button @click="emit('cancel')" class="w-full sm:w-auto flex-1 px-4 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 font-medium rounded-xl transition-colors">
               {{ cancelText || "Annulla" }}
             </button>
-            <button @click="emit('confirm')" class="flex-1 px-4 py-2 bg-red-500 text-white hover:bg-red-600 font-medium rounded-xl transition-colors shadow-sm">
+            <button @click="emit('confirm')" class="w-full sm:w-auto flex-1 px-4 py-2 bg-red-500 text-white hover:bg-red-600 font-medium rounded-xl transition-colors shadow-sm">
               {{ confirmText || "Elimina" }}
             </button>
           </div>

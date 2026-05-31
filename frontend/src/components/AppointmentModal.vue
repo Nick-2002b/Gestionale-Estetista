@@ -147,7 +147,7 @@ const handleSave = () => {
       </button>
     </div>
 
-    <div class="grid grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
       <div>
         <label class="block text-sm font-semibold text-gray-700 mb-1"> Data <span class="text-red-500">*</span> </label>
         <input type="date" v-model="date" class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-300 focus:border-pink-300 outline-none" />
@@ -172,8 +172,8 @@ const handleSave = () => {
     </div>
 
     <template #footer>
-      <button @click="$emit('close')" class="px-5 py-2.5 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-100 transition-colors bg-white shadow-sm">Annulla</button>
-      <button @click="handleSave" class="px-5 py-2.5 font-medium rounded-xl bg-primary hover:bg-primary/70 transition-colors shadow-sm">Crea Appuntamento</button>
+      <button @click="$emit('close')" class="w-full sm:w-auto px-5 py-2.5 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-100 transition-colors bg-white shadow-sm">Annulla</button>
+      <button @click="handleSave" class="w-full sm:w-auto px-5 py-2.5 font-medium rounded-xl bg-primary hover:bg-primary/70 transition-colors shadow-sm">Crea Appuntamento</button>
     </template>
   </BaseModal>
 </template>

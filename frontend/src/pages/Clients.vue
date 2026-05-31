@@ -126,24 +126,95 @@ const getInitials = (name: string, surname: string) => {
     <ClientsModal :is-open="isModalOpen" :is-editing="isEditing" :client="selectedClient" @close="isModalOpen = false" @save="saveClient" />
     <ConfirmDialog :is-open="isConfirmOpen" title="Elimina Cliente" message="Sei sicuro di voler eliminare questo cliente?" @confirm="confirmDelete" @cancel="cancelDelete" />
     <div class="bg-surface flex-col flex-1">
-      <div class="pb-2">
-        <div class="flex space-x-4">
-          <div class="relative w-full max-w-md">
+      <div class="pb-4">
+        <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 sm:space-x-0">
+          <div class="relative w-full sm:max-w-md">
             <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             <input v-model="searchQuery" type="search" placeholder="Cerca per nome, email o telefono" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-pink-light transition-shadow" />
           </div>
 
-          <select v-model="sortBy" class="bg-surface border border-gray-300 rounded-full shadow-sm px-4 text-sm focus:outline-none focus:ring-2 focus:ring-pink-light cursor-pointer">
+          <select v-model="sortBy" class="bg-surface border border-gray-300 rounded-full shadow-sm px-4 py-2 sm:py-0 text-sm focus:outline-none focus:ring-2 focus:ring-pink-light cursor-pointer w-full sm:w-auto">
             <option value="name">Ordina: Nome</option>
             <option value="recent">Ordina: Più recenti</option>
             <option value="appointments">Ordina: Più appuntamenti</option>
           </select>
         </div>
       </div>
+      <!-- Card mobile -->
+      <div class="grid gap-4 md:hidden">
+        <article v-for="client in filteredAndSortedClients" :key="client.id" class="rounded-3xl border border-gray-200 bg-white shadow-sm p-5 transition-colors hover:bg-gray-50/80">
+          <div class="flex items-start gap-4">
+            <div class="h-14 w-14 shrink-0 rounded-full bg-pink-100 flex items-center justify-center font-bold text-base text-gray-800">
+              {{ getInitials(client.name, client.surname) }}
+            </div>
 
-      <div class="overflow-hidden rounded-3xl border border-gray-300 shadow-sm">
+            <div class="min-w-0 flex-1">
+              <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <div class="font-semibold text-gray-900 text-xl leading-tight truncate">{{ client.name }} {{ client.surname }}</div>
+                  <div class="mt-1 text-sm font-medium text-gray-600">Membro dal {{ client.created_at }}</div>
+                </div>
+
+                <span v-if="client.sex" class="shrink-0 rounded-full bg-pink-50 px-3 py-1 text-sm font-semibold text-gray-600">
+                  {{ client.sex }}
+                </span>
+              </div>
+
+              <div class="mt-5 space-y-3">
+                <div class="flex items-center gap-3 text-base font-medium text-gray-700">
+                  <svg class="h-5 w-5 shrink-0 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                  </svg>
+                  <span v-if="client.phone">{{ client.phone }}</span>
+                  <span v-else class="text-gray-400 italic">Telefono non disponibile</span>
+                </div>
+
+                <div class="flex items-center gap-3 text-base font-medium text-gray-700">
+                  <svg class="h-5 w-5 shrink-0 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  <span v-if="client.email">{{ client.email }}</span>
+                  <span v-else class="text-gray-400 italic">Email non disponibile</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="my-5 h-px w-full bg-gray-200"></div>
+
+          <div class="flex w-full items-center justify-between gap-3">
+            <span class="inline-flex items-center gap-2 text-base font-bold uppercase tracking-wide bg-pink-100 rounded-full p-1">
+              <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              {{ client.appointment_count }} appuntamenti
+            </span>
+
+            <div class="flex items-center gap-3 shrink-0">
+              <button @click="editClient(client.id)" class="text-gray-600 hover:text-gray-900 transition-colors p-1.5" aria-label="Modifica cliente">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 inline-block" fill="none" viewBox="0 2 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                </svg>
+              </button>
+              <button @click="askDeleteClient(client.id)" class="text-red-600 hover:text-red-700 transition-colors p-1.5" aria-label="Elimina cliente">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 inline-block" fill="none" viewBox="0 2 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <div v-if="filteredAndSortedClients.length === 0" class="rounded-3xl border border-dashed border-gray-300 bg-white px-4 py-10 text-center text-gray-500">Nessun cliente trovato con i filtri attuali.</div>
+      </div>
+
+      <div class="hidden md:block overflow-x-auto rounded-3xl border border-gray-300 shadow-sm w-full">
         <table class="w-full text-left">
           <thead>
             <tr class="bg-gray-50 border-b border-gray-200 text-sm text-gray-500">
