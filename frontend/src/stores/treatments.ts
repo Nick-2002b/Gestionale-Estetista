@@ -15,6 +15,7 @@ export interface Treatment {
 export interface Category {
   id: number;
   name: string;
+  treatments_count?: number;
 }
 
 export const useTreatmentStore = defineStore("treatments", () => {
@@ -48,6 +49,26 @@ export const useTreatmentStore = defineStore("treatments", () => {
       return response.data.category;
     } catch (error) {
       console.error("Errore createCategory", error);
+      throw error;
+    }
+  };
+
+  const updateCategory = async (id: number, name: string) => {
+    try {
+      await api.post(`/treatments/categories/${id}`, { name });
+      await fetchData();
+    } catch (error) {
+      console.error("Errore updateCategory", error);
+      throw error;
+    }
+  };
+
+  const deleteCategory = async (id: number) => {
+    try {
+      await api.delete(`/treatments/categories/${id}`);
+      await fetchData();
+    } catch (error) {
+      console.error("Errore deleteCategory", error);
       throw error;
     }
   };
@@ -86,6 +107,8 @@ export const useTreatmentStore = defineStore("treatments", () => {
     categoriesList,
     fetchData,
     createCategory,
+    updateCategory,
+    deleteCategory,
     toggleStatus,
     editTreatment,
     deleteTreatment,

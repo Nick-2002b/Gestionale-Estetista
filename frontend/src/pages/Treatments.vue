@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import PageHeader from "../components/ViewHeader.vue";
 import TreatmentModal from "../components/TreatmentModal.vue";
+import BaseModal from "../components/BaseModal.vue";
 import { ref, computed, onMounted } from "vue";
 import { useTreatmentStore } from "../stores/treatments";
-import type { Treatment } from "../stores/treatments";
+import type { Treatment, Category } from "../stores/treatments";
 import ConfirmDialog from "../components/ConfirmDialog.vue";
 
 const store = useTreatmentStore();
@@ -84,6 +85,69 @@ const handleSave = async (payload: Treatment) => {
   }
 };
 
+const isCategoriesModalOpen = ref(false);
+const categoryErrorMessage = ref("");
+const editingCategoryId = ref<number | null>(null);
+const editingCategoryName = ref("");
+
+const isCategoryConfirmOpen = ref(false);
+const categoryToDelete = ref<number | null>(null);
+
+const closeCategoriesModal = () => {
+  isCategoriesModalOpen.value = false;
+  categoryErrorMessage.value = "";
+  cancelEditCategory();
+};
+
+const openCategoriesModal = () => {
+  categoryErrorMessage.value = "";
+  cancelEditCategory();
+  isCategoriesModalOpen.value = true;
+};
+
+const startEditCategory = (cat: Category) => {
+  editingCategoryId.value = cat.id;
+  editingCategoryName.value = cat.name;
+};
+
+const cancelEditCategory = () => {
+  editingCategoryId.value = null;
+  editingCategoryName.value = "";
+};
+
+const saveCategory = async (id: number) => {
+  if (!editingCategoryName.value.trim()) return;
+  try {
+    await store.updateCategory(id, editingCategoryName.value.trim());
+    cancelEditCategory();
+    categoryErrorMessage.value = "";
+  } catch (err) {
+    categoryErrorMessage.value = "Errore durante l'aggiornamento della categoria.";
+  }
+};
+
+const askDeleteCategory = (id: number) => {
+  categoryToDelete.value = id;
+  isCategoryConfirmOpen.value = true;
+};
+
+const confirmDeleteCategory = async () => {
+  if (categoryToDelete.value !== null) {
+    try {
+      await store.deleteCategory(categoryToDelete.value);
+      categoryErrorMessage.value = "";
+    } catch (error) {
+      categoryErrorMessage.value = "Errore durante l'eliminazione della categoria.";
+    }
+  }
+  isCategoryConfirmOpen.value = false;
+  categoryToDelete.value = null;
+};
+
+const cancelDeleteCategory = () => {
+  isCategoryConfirmOpen.value = false;
+  categoryToDelete.value = null;
+};
 </script>
 
 <template>
@@ -91,6 +155,44 @@ const handleSave = async (payload: Treatment) => {
     <PageHeader title="Trattamenti" button-text="Nuovo Trattamento" @action="handleAddTreatment" />
     <ConfirmDialog :is-open="isConfirmOpen" title="Elimina Trattamento" message="Sei sicuro di voler eliminare questo trattamento?" @confirm="confirmDelete" @cancel="cancelDelete" />
     <TreatmentModal :is-open="isModalOpen" :treatment="selectedTreatment" :categories="store.categoriesList" :is-editing="!!selectedTreatment?.id" @close="closeModal" @save="handleSave" />
+
+    <ConfirmDialog :is-open="isCategoryConfirmOpen" title="Elimina Categoria" message="Sei sicuro di voler eliminare questa categoria?" @confirm="confirmDeleteCategory" @cancel="cancelDeleteCategory" />
+
+    <BaseModal :is-open="isCategoriesModalOpen" title="Gestione Categorie" @close="closeCategoriesModal">
+      <div v-if="categoryErrorMessage" class="mb-4 p-3 bg-red-50 text-red-600 rounded-xl text-sm border border-red-100 flex items-center gap-2">
+        <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        <span>{{ categoryErrorMessage }}</span>
+      </div>
+
+      <ul class="space-y-3 max-h-96 overflow-y-auto pr-1">
+        <li v-for="cat in store.categoriesList" :key="cat.id" class="flex items-center justify-between p-3 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
+          <div v-if="editingCategoryId === cat.id" class="flex-1 flex gap-2">
+            <input v-model="editingCategoryName" @keyup.enter="saveCategory(cat.id)" type="text" class="flex-1 px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-pink-300" />
+            <button @click="saveCategory(cat.id)" class="text-green-600 hover:text-green-700">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+            </button>
+            <button @click="cancelEditCategory" class="text-gray-400 hover:text-gray-600">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+          </div>
+          <div v-else class="flex-1 font-medium text-gray-800">
+            {{ cat.name }}
+          </div>
+
+          <div v-if="editingCategoryId !== cat.id" class="flex items-center space-x-2 ml-4 shrink-0">
+            <button @click="startEditCategory(cat)" class="p-1.5 text-gray-400 hover:text-gray-900 transition-colors rounded-lg hover:bg-gray-200" title="Modifica categoria">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+            </button>
+            <button v-if="cat.treatments_count === 0" @click="askDeleteCategory(cat.id)" class="p-1.5 text-red-400 hover:text-red-600 transition-colors rounded-lg hover:bg-red-50" title="Elimina categoria">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+            </button>
+          </div>
+        </li>
+      </ul>
+      <template #footer>
+        <button @click="closeCategoriesModal" class="w-full sm:w-auto px-5 py-2.5 bg-gray-100 text-gray-700 hover:bg-gray-200 font-medium rounded-xl transition-colors">Chiudi</button>
+      </template>
+    </BaseModal>
 
     <div class="flex flex-col sm:flex-row gap-4 items-center">
       <div class="relative w-full md:max-w-md">
@@ -106,7 +208,7 @@ const handleSave = async (payload: Treatment) => {
       </select>
 
       <div class="w-full sm:w-auto sm:ml-auto">
-        <button class="w-full sm:w-auto bg-surface border border-gray-300 shadow-sm rounded-full py-2.5 px-4 text-sm hover:bg-pink-light cursor-pointer">Gestisci categorie</button>
+        <button type="button" @click="openCategoriesModal" class="w-full sm:w-auto bg-surface border border-gray-300 shadow-sm rounded-full py-2.5 px-4 text-sm hover:bg-pink-light cursor-pointer">Gestisci categorie</button>
       </div>
     </div>
 
