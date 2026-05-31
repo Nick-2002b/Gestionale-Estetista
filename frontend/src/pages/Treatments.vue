@@ -84,23 +84,13 @@ const handleSave = async (payload: Treatment) => {
   }
 };
 
-const handleAddNewCategory = async () => {
-  const newCatName = prompt("Inserisci il nome della nuova categoria (es. Massaggi):");
-  if (!newCatName || newCatName.trim() === "") return;
-
-  try {
-    await store.createCategory(newCatName.trim());
-  } catch (e) {
-    alert("Errore durante la creazione della categoria.");
-  }
-};
 </script>
 
 <template>
   <div class="space-y-6 relative">
     <PageHeader title="Trattamenti" button-text="Nuovo Trattamento" @action="handleAddTreatment" />
     <ConfirmDialog :is-open="isConfirmOpen" title="Elimina Trattamento" message="Sei sicuro di voler eliminare questo trattamento?" @confirm="confirmDelete" @cancel="cancelDelete" />
-    <TreatmentModal :is-open="isModalOpen" :treatment="selectedTreatment" :categories="store.categoriesList" :is-editing="!!selectedTreatment?.id" @close="closeModal" @save="handleSave" @add-new-category="handleAddNewCategory" />
+    <TreatmentModal :is-open="isModalOpen" :treatment="selectedTreatment" :categories="store.categoriesList" :is-editing="!!selectedTreatment?.id" @close="closeModal" @save="handleSave" />
 
     <div class="flex flex-col sm:flex-row gap-4 items-center">
       <div class="relative w-full md:max-w-md">
@@ -114,6 +104,10 @@ const handleAddNewCategory = async () => {
         <option value="all">Tutte le categorie</option>
         <option v-for="cat in store.categoriesList" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
       </select>
+
+      <div class="w-full sm:w-auto sm:ml-auto">
+        <button class="w-full sm:w-auto bg-surface border border-gray-300 shadow-sm rounded-full py-2.5 px-4 text-sm hover:bg-pink-light cursor-pointer">Gestisci categorie</button>
+      </div>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">

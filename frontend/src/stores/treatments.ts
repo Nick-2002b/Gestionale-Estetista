@@ -43,8 +43,9 @@ export const useTreatmentStore = defineStore("treatments", () => {
   };
   const createCategory = async (name: string) => {
     try {
-      await api.post(`/treatments/categories`, { name });
+      const response = await api.post(`/treatments/categories`, { name });
       await fetchData();
+      return response.data.category;
     } catch (error) {
       console.error("Errore createCategory", error);
       throw error;
