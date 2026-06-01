@@ -44,11 +44,25 @@ export const useAppointmentStore = defineStore("appointments", () => {
     }
   };
 
+  const updateAppointment = async (id: string, payload: any) => {
+    try {
+      isLoading.value = true;
+      await api.post(`/appointments/${id}`, payload);
+      await fetchAppointments();
+    } catch (error) {
+      console.error("Errore durante l'aggiornamento:", error);
+      throw error;
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
   return {
     appointmentsList,
     isLoading,
     fetchAppointments,
     createAppointment,
     deleteAppointment,
+    updateAppointment,
   };
 });
