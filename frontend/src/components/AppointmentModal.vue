@@ -3,10 +3,14 @@ import { computed, ref, watch } from "vue";
 import BaseModal from "./BaseModal.vue";
 import { api } from "../utils/axios";
 import { calculateEndTime } from "../utils/timeCalculator";
+import { useAppointmentStore } from "../stores/appointments";
+
+const appointmentStore = useAppointmentStore();
 
 const props = defineProps<{
   isOpen: boolean;
   refreshKey?: number;
+  editAppointmentId?: string | null;
 }>();
 
 const emit = defineEmits(["close", "save", "addNewClient"]);
@@ -62,6 +66,27 @@ watch(
   () => props.isOpen,
   async (isNowOpen) => {
     if (isNowOpen) {
+      try {
+        await loadFormData();
+      } catch (error) {
+        console.error("Errore caricamento clienti/trattamenti:", error);
+      }
+      if (props.editAppointmentId) {
+        const apptToEdit = appointmentStore.appointmentsList.find((a) => String(a.id) === props.editAppointmentId);
+        if (apptToEdit) {
+          selectedClientId.value = apptToEdit.client_id;
+          date.value = apptToEdit.date;
+          startTime.value = apptToEdit.start_time;
+          endTime.value = apptToEdit.end_time;
+          notes.value = apptToEdit.notes || "";
+
+          selectedTreatments.value = apptToEdit.treatments.map((t: any) => ({
+            id: Date.now() + Math.random(),
+            treatmentId: t.id,
+          }));
+          return;
+        }
+      }
       const today = new Date();
 
       date.value = today.toISOString().split("T")[0];
@@ -71,12 +96,6 @@ watch(
       endTime.value = "";
       notes.value = "";
       selectedTreatments.value = [{ id: Date.now(), treatmentId: "" }];
-
-      try {
-        await loadFormData();
-      } catch (error) {
-        console.error("Errore caricamento clienti/trattamenti:", error);
-      }
     }
   },
 );
@@ -122,7 +141,7 @@ const handleSave = () => {
 </script>
 
 <template>
-  <BaseModal :is-open="isOpen" title="Nuovo Appuntamento" @close="$emit('close')">
+  <BaseModal :is-open="isOpen" :title="editAppointmentId ? 'Modifica Appuntamento' : 'Nuovo Appuntamento'" @close="$emit('close')">
     <div>
       <label class="block text-sm font-semibold text-gray-700 mb-1"> Cliente <span class="text-red-500">*</span> </label>
       <select v-model="selectedClientId" class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-300 focus:border-pink-300 outline-none bg-surface">
@@ -181,7 +200,7 @@ const handleSave = () => {
 
     <template #footer>
       <button @click="$emit('close')" class="w-full sm:w-auto px-5 py-2.5 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-100 transition-colors bg-white shadow-sm">Annulla</button>
-      <button @click="handleSave" class="w-full sm:w-auto px-5 py-2.5 font-medium rounded-xl bg-primary hover:bg-primary/70 transition-colors shadow-sm">Crea Appuntamento</button>
+      <button @click="handleSave" class="w-full sm:w-auto px-5 py-2.5 font-medium rounded-xl bg-primary hover:bg-primary/70 transition-colors shadow-sm">{{ editAppointmentId ? "Salva Modifiche" : "Crea Appuntamento" }}</button>
     </template>
   </BaseModal>
 </template>

@@ -96,8 +96,12 @@ const calendarRef = ref<InstanceType<typeof FullCalendar> | null>(null);
 
 const handleSaveAppointment = async (payload: any) => {
   try {
-    await appointmentStore.createAppointment(payload);
-    isModalOpen.value = false;
+    if (currentEditAppointmentId.value) {
+      await appointmentStore.updateAppointment(currentEditAppointmentId.value, payload);
+    } else {
+      await appointmentStore.createAppointment(payload);
+    }
+    handleCloseAppointmentModal();
   } catch (error) {
     console.error("Errore salvataggio:", error);
     alert("Non è stato possibile salvare l'appuntamento.");
@@ -110,6 +114,7 @@ const isModalOpen = ref(false);
 const isClientModalOpen = ref(false);
 const isConfirmOpen = ref(false);
 const clientOptionsRefreshKey = ref(0);
+const currentEditAppointmentId = ref<string | null>(null);
 
 const viewModes = [
   { label: "Giorno", value: "timeGridDay" },
@@ -117,12 +122,20 @@ const viewModes = [
   { label: "Mese", value: "dayGridMonth" },
 ];
 
+const handleEditAppointment = () => {
+  if (!contextMenu.value.eventId) return;
+  currentEditAppointmentId.value = contextMenu.value.eventId;
+  isModalOpen.value = true;
+  closeContextMenu();
+};
+
 const handleAddAppointment = () => {
   isModalOpen.value = true;
 };
 
 const handleCloseAppointmentModal = () => {
   isModalOpen.value = false;
+  currentEditAppointmentId.value = null;
 };
 
 const handleOpenClientModalFromAppointment = () => {
@@ -194,7 +207,7 @@ onUnmounted(() => {
 <template>
   <div class="relative flex-1 flex flex-col h-full min-h-0">
     <!-- Menu Contestuale (Click Destro) -->
-    <div v-if="contextMenu.visible" :style="{ top: `${contextMenu.y}px`, left: `${contextMenu.x}px` }" class="fixed z-50 bg-white border border-gray-200 rounded-full shadow-sm w-32 m-0 overflow-hidden">
+    <div v-if="contextMenu.visible" :style="{ top: `${contextMenu.y}px`, left: `${contextMenu.x}px` }" class="fixed z-50 bg-white border border-gray-200 rounded-xl shadow-sm w-32 m-0 overflow-hidden">
       <button @click="askDelete" class="text-left w-full p-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 transition-colors cursor-pointer">
         <svg xmlns="http://www.w3.org/2000/svg" width="15" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M3 6h18" />
@@ -205,10 +218,19 @@ onUnmounted(() => {
         </svg>
         <span>Elimina</span>
       </button>
+      <button @click="handleEditAppointment" class="text-left w-full p-2 text-sm hover:bg-gray-100 flex items-center gap-2 transition-colors cursor-pointer">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4.5">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+        </svg>
+        <span>Modifica</span>
+      </button>
     </div>
 
     <PageHeader title="Agenda" button-text="Nuovo Appuntamento" @action="handleAddAppointment" class="shrink-0" />
-    <AppointmentModal :is-open="isModalOpen" :refresh-key="clientOptionsRefreshKey" @close="handleCloseAppointmentModal" @save="handleSaveAppointment" @add-new-client="handleOpenClientModalFromAppointment" />
+    <AppointmentModal :is-open="isModalOpen" :refresh-key="clientOptionsRefreshKey" :edit-appointment-id="currentEditAppointmentId" @close="handleCloseAppointmentModal" @save="handleSaveAppointment" @add-new-client="handleOpenClientModalFromAppointment" />
     <ClientsModal :is-open="isClientModalOpen" @close="handleCloseClientModal" @save="handleSaveClientFromAgenda" />
     <ConfirmDialog :is-open="isConfirmOpen" title="Elimina Appuntamento" message="Sei sicuro di voler eliminare questo appuntamento?" @confirm="handleDeleteAppointment" @cancel="cancelDelete" />
     <div class="flex flex-col md:flex-row gap-4 md:gap-0 items-center justify-between shrink-0 my-4">
