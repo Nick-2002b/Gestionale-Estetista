@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, nextTick, computed, onUnmounted } from "vue";
+import { ref, onMounted, nextTick, computed, onUnmounted, watch } from "vue";
 import FullCalendar from "@fullcalendar/vue3";
 import type { CalendarOptions } from "@fullcalendar/core";
 import { useCalendar } from "../components/Calendar.ts";
@@ -9,9 +9,12 @@ import { useAppointmentStore } from "../stores/appointments";
 import { useClientStore } from "../stores/clients";
 import ConfirmDialog from "../components/ConfirmDialog.vue";
 import ClientsModal from "../components/ClientsModal.vue";
+import { useWindowSize } from "@vueuse/core";
 
 const appointmentStore = useAppointmentStore();
 const clientStore = useClientStore();
+const { width } = useWindowSize();
+const isMobile = computed(() => width.value < 768);
 
 type ClientPayload = {
   name: string;
@@ -113,12 +116,27 @@ const isConfirmOpen = ref(false);
 const clientOptionsRefreshKey = ref(0);
 const currentEditAppointmentId = ref<string | null>(null);
 
-const viewModes = [
-  { label: "Giorno", value: "timeGridDay" },
-  { label: "Settimana", value: "timeGridWeek" },
-  { label: "Mese", value: "dayGridMonth" },
-];
+const viewModes = computed(() => {
+  if (isMobile.value) {
+    return [
+      { label: "Giorno", value: "timeGridDay" },
+      { label: "Settimana", value: "timeGridWeek" },
+    ];
+  }
 
+  return [
+    { label: "Giorno", value: "timeGridDay" },
+    { label: "Settimana", value: "timeGridWeek" },
+    { label: "Mese", value: "dayGridMonth" },
+  ];
+});
+watch(isMobile, (mobile) => {
+  const targetView = mobile ? "timeGridDay" : "timeGridWeek";
+
+  if (currentView.value !== targetView) {
+    changeView(targetView);
+  }
+});
 const handleEditAppointment = () => {
   if (!contextMenu.value.eventId) return;
   currentEditAppointmentId.value = contextMenu.value.eventId;
@@ -193,7 +211,10 @@ const formatDayName = (date: Date) => {
 
 onMounted(async () => {
   await nextTick();
-  updateCalendarState();
+  if (isMobile.value) {
+    changeView("timeGridDay");
+    return;
+  }
 });
 
 onUnmounted(() => {
