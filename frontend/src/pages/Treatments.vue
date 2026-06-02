@@ -6,6 +6,7 @@ import { ref, computed, onMounted } from "vue";
 import { useTreatmentStore } from "../stores/treatments";
 import type { Treatment, Category } from "../stores/treatments";
 import ConfirmDialog from "../components/ConfirmDialog.vue";
+import { getApiErrorMessage } from "../utils/errorMessage";
 
 const store = useTreatmentStore();
 
@@ -46,13 +47,16 @@ const filteredTreatments = computed(() => {
 
 const isModalOpen = ref(false);
 const selectedTreatment = ref<Partial<Treatment> | undefined>(undefined);
+const treatmentErrorMessage = ref("");
 
 const closeModal = () => {
   isModalOpen.value = false;
   selectedTreatment.value = undefined;
+  treatmentErrorMessage.value = "";
 };
 
 const handleAddTreatment = () => {
+  treatmentErrorMessage.value = "";
   selectedTreatment.value = {
     id: 0,
     name: "",
@@ -67,11 +71,13 @@ const handleAddTreatment = () => {
 };
 
 const handleEdit = (t: Treatment) => {
+  treatmentErrorMessage.value = "";
   selectedTreatment.value = { ...t };
   isModalOpen.value = true;
 };
 
 const handleSave = async (payload: Treatment) => {
+  treatmentErrorMessage.value = "";
   try {
     if (payload.id && payload.id > 0) {
       await store.editTreatment(payload.id, payload);
@@ -81,7 +87,7 @@ const handleSave = async (payload: Treatment) => {
     await store.fetchData();
     closeModal();
   } catch (err) {
-    alert("Errore nel salvataggio del trattamento.");
+    treatmentErrorMessage.value = getApiErrorMessage(err, "Errore nel salvataggio del trattamento.");
   }
 };
 
@@ -116,13 +122,12 @@ const cancelEditCategory = () => {
 };
 
 const saveCategory = async (id: number) => {
-  if (!editingCategoryName.value.trim()) return;
   try {
     await store.updateCategory(id, editingCategoryName.value.trim());
     cancelEditCategory();
     categoryErrorMessage.value = "";
   } catch (err) {
-    categoryErrorMessage.value = "Errore durante l'aggiornamento della categoria.";
+    categoryErrorMessage.value = getApiErrorMessage(err, "Errore durante l'aggiornamento della categoria.");
   }
 };
 
@@ -137,7 +142,7 @@ const confirmDeleteCategory = async () => {
       await store.deleteCategory(categoryToDelete.value);
       categoryErrorMessage.value = "";
     } catch (error) {
-      categoryErrorMessage.value = "Errore durante l'eliminazione della categoria.";
+      categoryErrorMessage.value = getApiErrorMessage(error, "Errore durante l'eliminazione della categoria.");
     }
   }
   isCategoryConfirmOpen.value = false;
@@ -154,7 +159,7 @@ const cancelDeleteCategory = () => {
   <div class="space-y-6 relative">
     <PageHeader title="Trattamenti" button-text="Nuovo Trattamento" @action="handleAddTreatment" />
     <ConfirmDialog :is-open="isConfirmOpen" title="Elimina Trattamento" message="Sei sicuro di voler eliminare questo trattamento?" @confirm="confirmDelete" @cancel="cancelDelete" />
-    <TreatmentModal :is-open="isModalOpen" :treatment="selectedTreatment" :categories="store.categoriesList" :is-editing="!!selectedTreatment?.id" @close="closeModal" @save="handleSave" />
+    <TreatmentModal :is-open="isModalOpen" :treatment="selectedTreatment" :categories="store.categoriesList" :is-editing="!!selectedTreatment?.id" :error-message="treatmentErrorMessage" @close="closeModal" @save="handleSave" />
 
     <ConfirmDialog :is-open="isCategoryConfirmOpen" title="Elimina Categoria" message="Sei sicuro di voler eliminare questa categoria?" @confirm="confirmDeleteCategory" @cancel="cancelDeleteCategory" />
 

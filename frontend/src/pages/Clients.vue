@@ -5,6 +5,7 @@ import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useClientStore } from "../stores/clients.js";
 import ConfirmDialog from "../components/ConfirmDialog.vue";
+import { getApiErrorMessage } from "../utils/errorMessage";
 
 type ClientPayload = {
   name: string;
@@ -28,6 +29,7 @@ const isEditing = ref(false);
 const currentClientId = ref<number | null>(null);
 const isConfirmOpen = ref(false);
 const clientToDelete = ref<number | null>(null);
+const clientErrorMessage = ref("");
 
 const selectedClient = ref<ClientPayload | undefined>();
 
@@ -35,6 +37,7 @@ const openModal = () => {
   selectedClient.value = undefined;
   isEditing.value = false;
   currentClientId.value = null;
+  clientErrorMessage.value = "";
   isModalOpen.value = true;
 };
 
@@ -52,11 +55,13 @@ const editClient = (id: number) => {
     };
     isEditing.value = true;
     currentClientId.value = id;
+    clientErrorMessage.value = "";
     isModalOpen.value = true;
   }
 };
 
 const saveClient = async (payload: ClientPayload) => {
+  clientErrorMessage.value = "";
   try {
     if (isEditing.value && currentClientId.value !== null) {
       await clientStore.editClient(currentClientId.value, payload);
@@ -66,7 +71,7 @@ const saveClient = async (payload: ClientPayload) => {
 
     isModalOpen.value = false;
   } catch (error) {
-    console.error("Errore durante il salvataggio del cliente:", error);
+    clientErrorMessage.value = getApiErrorMessage(error, "Non è stato possibile salvare il cliente.");
   }
 };
 const askDeleteClient = (id: number) => {
@@ -129,7 +134,7 @@ const goToClientDetail = (id: number) => {
 <template>
   <div class="space-y-4 relative">
     <PageHeader title="Clienti" button-text="Nuovo Cliente" @action="openModal" />
-    <ClientsModal :is-open="isModalOpen" :is-editing="isEditing" :client="selectedClient" @close="isModalOpen = false" @save="saveClient" />
+    <ClientsModal :is-open="isModalOpen" :is-editing="isEditing" :client="selectedClient" :error-message="clientErrorMessage" @close="isModalOpen = false" @save="saveClient" />
     <ConfirmDialog :is-open="isConfirmOpen" title="Elimina Cliente" message="Sei sicuro di voler eliminare questo cliente?" @confirm="confirmDelete" @cancel="cancelDelete" />
     <div class="bg-surface flex-col flex-1">
       <div class="pb-4">

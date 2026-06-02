@@ -10,6 +10,7 @@ import { useClientStore } from "../stores/clients";
 import ConfirmDialog from "../components/ConfirmDialog.vue";
 import ClientsModal from "../components/ClientsModal.vue";
 import { useWindowSize } from "@vueuse/core";
+import { getApiErrorMessage } from "../utils/errorMessage";
 
 const appointmentStore = useAppointmentStore();
 const clientStore = useClientStore();
@@ -95,6 +96,7 @@ const finalCalendarOptions = computed(() => {
 const calendarRef = ref<InstanceType<typeof FullCalendar> | null>(null);
 
 const handleSaveAppointment = async (payload: any) => {
+  appointmentErrorMessage.value = "";
   try {
     if (currentEditAppointmentId.value) {
       await appointmentStore.updateAppointment(currentEditAppointmentId.value, payload);
@@ -103,8 +105,7 @@ const handleSaveAppointment = async (payload: any) => {
     }
     handleCloseAppointmentModal();
   } catch (error) {
-    console.error("Errore salvataggio:", error);
-    alert("Non è stato possibile salvare l'appuntamento.");
+    appointmentErrorMessage.value = getApiErrorMessage(error, "Non è stato possibile salvare l'appuntamento.");
   }
 };
 
@@ -113,6 +114,8 @@ const currentView = ref("timeGridWeek");
 const isModalOpen = ref(false);
 const isClientModalOpen = ref(false);
 const isConfirmOpen = ref(false);
+const appointmentErrorMessage = ref("");
+const clientErrorMessage = ref("");
 const clientOptionsRefreshKey = ref(0);
 const currentEditAppointmentId = ref<string | null>(null);
 
@@ -145,30 +148,34 @@ const handleEditAppointment = () => {
 };
 
 const handleAddAppointment = () => {
+  appointmentErrorMessage.value = "";
   isModalOpen.value = true;
 };
 
 const handleCloseAppointmentModal = () => {
   isModalOpen.value = false;
   currentEditAppointmentId.value = null;
+  appointmentErrorMessage.value = "";
 };
 
 const handleOpenClientModalFromAppointment = () => {
+  clientErrorMessage.value = "";
   isClientModalOpen.value = true;
 };
 
 const handleCloseClientModal = () => {
   isClientModalOpen.value = false;
+  clientErrorMessage.value = "";
 };
 
 const handleSaveClientFromAgenda = async (payload: ClientPayload) => {
+  clientErrorMessage.value = "";
   try {
     await clientStore.createClient(payload);
     isClientModalOpen.value = false;
     clientOptionsRefreshKey.value += 1;
   } catch (error) {
-    console.error("Errore durante il salvataggio del cliente:", error);
-    alert("Non è stato possibile creare il cliente.");
+    clientErrorMessage.value = getApiErrorMessage(error, "Non è stato possibile creare il cliente.");
   }
 };
 
@@ -248,8 +255,8 @@ onUnmounted(() => {
     </div>
 
     <PageHeader title="Agenda" button-text="Nuovo Appuntamento" @action="handleAddAppointment" class="shrink-0" />
-    <AppointmentModal :is-open="isModalOpen" :refresh-key="clientOptionsRefreshKey" :edit-appointment-id="currentEditAppointmentId" @close="handleCloseAppointmentModal" @save="handleSaveAppointment" @add-new-client="handleOpenClientModalFromAppointment" />
-    <ClientsModal :is-open="isClientModalOpen" @close="handleCloseClientModal" @save="handleSaveClientFromAgenda" />
+    <AppointmentModal :is-open="isModalOpen" :refresh-key="clientOptionsRefreshKey" :edit-appointment-id="currentEditAppointmentId" :error-message="appointmentErrorMessage" @close="handleCloseAppointmentModal" @save="handleSaveAppointment" @add-new-client="handleOpenClientModalFromAppointment" />
+    <ClientsModal :is-open="isClientModalOpen" :error-message="clientErrorMessage" @close="handleCloseClientModal" @save="handleSaveClientFromAgenda" />
     <ConfirmDialog :is-open="isConfirmOpen" title="Elimina Appuntamento" message="Sei sicuro di voler eliminare questo appuntamento?" @confirm="handleDeleteAppointment" @cancel="cancelDelete" />
     <div class="flex flex-col md:flex-row gap-4 md:gap-0 items-center justify-between shrink-0 my-4">
       <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start order-2 md:order-1">

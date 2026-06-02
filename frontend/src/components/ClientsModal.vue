@@ -16,6 +16,7 @@ const props = defineProps<{
   isOpen: boolean;
   isEditing?: boolean;
   client?: ClientForm;
+  errorMessage?: string;
 }>();
 
 const emit = defineEmits(["close", "save"]);
@@ -67,11 +68,6 @@ watch(
 );
 
 const handleSave = () => {
-  if (!name.value || !surname.value) {
-    alert("I campi Nome e Cognome sono obbligatori.");
-    return;
-  }
-
   const payload: ClientForm = {
     name: name.value,
     surname: surname.value,
@@ -88,6 +84,10 @@ const handleSave = () => {
 
 <template>
   <BaseModal :is-open="isOpen" :title="isEditing ? 'Modifica Cliente' : 'Nuovo Cliente'" @close="$emit('close')">
+    <div v-if="errorMessage" class="rounded-lg border border-pink-light px-4 py-3 text-sm bg-background text-gray-800">
+      {{ errorMessage }}
+    </div>
+
     <div class="space-y-4">
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>

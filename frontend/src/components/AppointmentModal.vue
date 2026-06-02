@@ -11,6 +11,7 @@ const props = defineProps<{
   isOpen: boolean;
   refreshKey?: number;
   editAppointmentId?: string | null;
+  errorMessage?: string;
 }>();
 
 const emit = defineEmits(["close", "save", "addNewClient"]);
@@ -132,16 +133,16 @@ const handleSave = () => {
     endTime: endTime.value,
     notes: notes.value,
   };
-  if (!payload.clientId || !payload.date || !payload.startTime) {
-    alert("Compila i campi obbligatori");
-    return;
-  }
   emit("save", payload);
 };
 </script>
 
 <template>
   <BaseModal :is-open="isOpen" :title="editAppointmentId ? 'Modifica Appuntamento' : 'Nuovo Appuntamento'" @close="$emit('close')">
+    <div v-if="errorMessage" class="rounded-lg border border-pink-light px-4 py-3 text-sm bg-background text-gray-800">
+      {{ errorMessage }}
+    </div>
+
     <div>
       <label class="block text-sm font-semibold text-gray-700 mb-1"> Cliente <span class="text-red-500">*</span> </label>
       <select v-model="selectedClientId" class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-300 focus:border-pink-300 outline-none bg-surface">
