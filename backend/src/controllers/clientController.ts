@@ -6,7 +6,7 @@ export const getAllClients = async (req: Request, res: Response): Promise<void> 
     const db = await getDb();
     const clients = await db.all(`
       SELECT 
-        c.id, c.name, c.surname, c.sex, c.phone, c.email, c.notes, c.created_at,
+        c.id, c.name, c.surname, c.sex, c.birth_date, c.phone, c.email, c.notes, c.created_at,
         COUNT(a.id) as appointment_count
       FROM clients c
       LEFT JOIN appointments a ON c.id = a.client_id

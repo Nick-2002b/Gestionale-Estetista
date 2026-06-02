@@ -5,6 +5,7 @@ import Login from "../pages/Login.vue";
 import Agenda from "../pages/Agenda.vue";
 import Treatments from "../pages/Treatments.vue";
 import Clients from "../pages/Clients.vue";
+import ClientDetail from "../pages/ClientDetail.vue";
 import Layout from "../layouts/MainLayout.vue";
 
 const routes: Array<RouteRecordRaw> = [
@@ -33,6 +34,11 @@ const routes: Array<RouteRecordRaw> = [
         path: "clients",
         name: "Clients",
         component: Clients,
+      },
+      {
+        path: "clients/:id",
+        name: "ClientDetail",
+        component: ClientDetail,
       },
     ],
   },

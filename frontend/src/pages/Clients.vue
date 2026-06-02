@@ -2,6 +2,7 @@
 import PageHeader from "../components/ViewHeader.vue";
 import ClientsModal from "../components/ClientsModal.vue";
 import { ref, onMounted, computed } from "vue";
+import { useRouter } from "vue-router";
 import { useClientStore } from "../stores/clients.js";
 import ConfirmDialog from "../components/ConfirmDialog.vue";
 
@@ -16,6 +17,7 @@ type ClientPayload = {
 };
 
 const clientStore = useClientStore();
+const router = useRouter();
 
 onMounted(() => {
   clientStore.fetchClients();
@@ -119,6 +121,10 @@ const filteredAndSortedClients = computed(() => {
 const getInitials = (name: string, surname: string) => {
   return `${name.charAt(0)}${surname.charAt(0)}`.toUpperCase();
 };
+
+const goToClientDetail = (id: number) => {
+  router.push({ name: "ClientDetail", params: { id: String(id) } });
+};
 </script>
 <template>
   <div class="space-y-4 relative">
@@ -144,7 +150,7 @@ const getInitials = (name: string, surname: string) => {
       </div>
       <!-- Card mobile -->
       <div class="grid gap-4 md:hidden">
-        <article v-for="client in filteredAndSortedClients" :key="client.id" class="rounded-3xl border border-gray-200 bg-white shadow-sm p-5 transition-colors hover:bg-gray-50/80">
+        <article v-for="client in filteredAndSortedClients" :key="client.id" class="rounded-3xl border border-gray-200 bg-white shadow-sm p-5 transition-colors hover:bg-gray-50/80 cursor-pointer" @click="goToClientDetail(client.id)">
           <div class="flex items-start gap-4">
             <div class="h-14 w-14 shrink-0 rounded-full bg-pink-100 flex items-center justify-center font-bold text-base text-gray-800">
               {{ getInitials(client.name, client.surname) }}
@@ -197,12 +203,12 @@ const getInitials = (name: string, surname: string) => {
             </span>
 
             <div class="flex items-center gap-3 shrink-0">
-              <button @click="editClient(client.id)" class="text-gray-600 hover:text-gray-900 transition-colors p-1.5" aria-label="Modifica cliente">
+              <button @click.stop="editClient(client.id)" class="text-gray-600 hover:text-gray-900 transition-colors p-1.5" aria-label="Modifica cliente">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 inline-block" fill="none" viewBox="0 2 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                 </svg>
               </button>
-              <button @click="askDeleteClient(client.id)" class="text-red-600 hover:text-red-700 transition-colors p-1.5" aria-label="Elimina cliente">
+              <button @click.stop="askDeleteClient(client.id)" class="text-red-600 hover:text-red-700 transition-colors p-1.5" aria-label="Elimina cliente">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 inline-block" fill="none" viewBox="0 2 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
@@ -226,7 +232,7 @@ const getInitials = (name: string, surname: string) => {
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
-            <tr v-for="client in filteredAndSortedClients" :key="client.id" class="hover:bg-gray-100/50 transition-colors">
+            <tr v-for="client in filteredAndSortedClients" :key="client.id" class="hover:bg-gray-100/50 transition-colors cursor-pointer" @click="goToClientDetail(client.id)">
               <!-- Colonna Cliente -->
               <td class="py-4 px-4 flex">
                 <div class="h-10 w-10 flex rounded-full bg-pink-100 justify-center items-center font-bold text-sm">
@@ -274,12 +280,12 @@ const getInitials = (name: string, surname: string) => {
               </td>
               <!-- Colonna Bottoni azioni -->
               <td class="text-center">
-                <button @click="editClient(client.id)" class="text-gray-400 hover:text-gray-900 transition-colors rounded-lg p-1 hover:bg-pink-100">
+                <button @click.stop="editClient(client.id)" class="text-gray-400 hover:text-gray-900 transition-colors rounded-lg p-1 hover:bg-pink-100">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block" fill="none" viewBox="0 2 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                   </svg>
                 </button>
-                <button @click="askDeleteClient(client.id)" class="text-red-400 hover:text-red-600 hover:bg-red-50 p-1 rounded-lg transition-colors">
+                <button @click.stop="askDeleteClient(client.id)" class="text-red-400 hover:text-red-600 hover:bg-red-50 p-1 rounded-lg transition-colors">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block" fill="none" viewBox="0 2 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                   </svg>

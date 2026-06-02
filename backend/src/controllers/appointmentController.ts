@@ -62,7 +62,7 @@ export const getAppointments = async (req: Request, res: Response): Promise<void
     for (const appt of appointments) {
       const treatments = await db.all(
         `
-        SELECT t.id, t.name, t.category_id 
+        SELECT t.id, t.name, t.category_id, t.color, t.duration, t.price
         FROM treatments t
         JOIN appointment_treatments at ON t.id = at.treatment_id
         WHERE at.appointment_id = ?
@@ -71,6 +71,8 @@ export const getAppointments = async (req: Request, res: Response): Promise<void
       );
 
       appt.treatments = treatments;
+      appt.total_duration = treatments.reduce((total, treatment) => total + Number(treatment.duration || 0), 0);
+      appt.total_price = treatments.reduce((total, treatment) => total + Number(treatment.price || 0), 0);
     }
 
     res.status(200).json({ appointments });
