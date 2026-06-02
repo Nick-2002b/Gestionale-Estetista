@@ -40,7 +40,7 @@ const isActiveRoute = (path: string) => route.path === path;
     <aside class="hidden md:flex w-64 shrink-0 bg-surface border-r border-gray-200 flex-col overflow-y-auto z-20">
       <div class="h-20 shrink-0 flex items-center px-6 border-b border-gray-100">
         <div class="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center mr-3">
-          <img src="../../public/img/logo.png" alt="Logo" />
+          <img src="/img/logo.png" alt="Logo" />
         </div>
         <h1 class="text-gray-800 text-lg">CC Beauty Lab</h1>
       </div>
@@ -67,11 +67,11 @@ const isActiveRoute = (path: string) => route.path === path;
         <!-- Mobile Logo -->
         <div class="flex md:hidden items-center">
           <div class="w-8 h-8 rounded-full bg-pink-100 flex items-center justify-center mr-2">
-            <img src="../../public/img/logo.png" alt="Logo" class="w-6 h-6 object-contain" />
+            <img src="/img/logo.png" alt="Logo" class="w-6 h-6 object-contain" />
           </div>
           <h1 class="text-gray-800 text-base font-medium">CC Beauty Lab</h1>
         </div>
-        
+
         <div ref="dropdownRef" class="relative border border-gray-200 p-1.5 rounded-full hover:bg-pink-100 transition-colors">
           <button @click="showDropdown = !showDropdown" class="flex items-center space-x-2 md:space-x-3 cursor-pointer">
             <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-pink-100 flex items-center justify-center font-bold text-xs md:text-sm">

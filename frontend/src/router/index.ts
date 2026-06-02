@@ -13,7 +13,7 @@ const routes: Array<RouteRecordRaw> = [
     path: "/login",
     name: "Login",
     component: Login,
-    meta: { requiresGuest: true },
+    meta: { requiresGuest: true, title: "CCBeautyLab | Login" },
   },
   {
     path: "/",
@@ -24,21 +24,25 @@ const routes: Array<RouteRecordRaw> = [
         path: "",
         name: "Agenda",
         component: Agenda,
+        meta: { title: "CCBeautyLab | Agenda" },
       },
       {
         path: "treatments",
         name: "Treatments",
         component: Treatments,
+        meta: { title: "CCBeautyLab | Trattamenti" },
       },
       {
         path: "clients",
         name: "Clients",
         component: Clients,
+        meta: { title: "CCBeautyLab | Clienti" },
       },
       {
         path: "clients/:id",
         name: "ClientDetail",
         component: ClientDetail,
+        meta: { title: "CCBeautyLab | Dettaglio Cliente" },
       },
     ],
   },
@@ -51,6 +55,7 @@ const router = createRouter({
 
 router.beforeEach(async (to, _from, next) => {
   const authStore = useAuthStore();
+  const pageTitle = to.meta.title;
 
   //se e il primo caricmaneto dell'app, interroghiamo il backend
   if (!authStore.isReady) {
@@ -63,6 +68,9 @@ router.beforeEach(async (to, _from, next) => {
     next({ name: "Agenda" });
   } else {
     next();
+  }
+  if (pageTitle) {
+    document.title = pageTitle as string;
   }
 });
 

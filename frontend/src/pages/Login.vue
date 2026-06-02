@@ -87,7 +87,7 @@ const handleSubmit = () => {
     <!-- Prima meta -->
     <div class="hidden md:flex flex-col items-center justify-center bg-linear-to-br from-pink-light via-primary/30 to-gold-light text-white p-8">
       <div class="w-50 h-50 rounded-full flex items-center mb-6 overflow-hidden shadow-2xl">
-        <img src="../../public/img/logo.png" alt="Logo" />
+        <img src="/img/logo.png" alt="Logo" />
       </div>
       <h1 class="text-3xl font-bold text-foreground mb-4 text-balance text-black">CC Beauty Lab</h1>
     </div>
@@ -95,7 +95,7 @@ const handleSubmit = () => {
     <div class="flex flex-col items-center justify-center bg-surface p-6">
       <div class="mb-4 md:hidden">
         <div class="w-32 h-32 rounded-full shadow-lg bg-white">
-          <img src="../../public/img/logo.png" alt="Logo" />
+          <img src="/img/logo.png" alt="Logo" />
         </div>
       </div>
       <div class="flex items-center justify-center w-full">
@@ -106,16 +106,8 @@ const handleSubmit = () => {
           </div>
           <!-- Switch registrati/login -->
           <div class="flex bg-background p-1 rounded-lg mb-8">
-            <button
-              @click="toggleMode(true)"
-              :class="['flex-1 py-2 rounded-md text-sm font-medium transition-all duration-200', isLogin ? 'bg-surface shadow-sm' : 'text-gray-500 hover:text-gray-700']">
-              Accedi
-            </button>
-            <button
-              @click="toggleMode(false)"
-              :class="['flex-1 py-2 rounded-md text-sm font-medium transition-all duration-200', !isLogin ? 'bg-surface shadow-sm ' : 'text-gray-500 hover:text-gray-700']">
-              Registrati
-            </button>
+            <button @click="toggleMode(true)" :class="['flex-1 py-2 rounded-md text-sm font-medium transition-all duration-200', isLogin ? 'bg-surface shadow-sm' : 'text-gray-500 hover:text-gray-700']">Accedi</button>
+            <button @click="toggleMode(false)" :class="['flex-1 py-2 rounded-md text-sm font-medium transition-all duration-200', !isLogin ? 'bg-surface shadow-sm ' : 'text-gray-500 hover:text-gray-700']">Registrati</button>
           </div>
           <!-- Forms -->
           <form @submit.prevent="handleSubmit" class="space-y-6">
@@ -145,13 +137,7 @@ const handleSubmit = () => {
                       <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
                       <circle cx="12" cy="7" r="4"></circle>
                     </svg>
-                    <input
-                      type="text"
-                      id="name"
-                      v-model="name"
-                      required
-                      class="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-pink-light focus:border-pink-light outline-none transition-colors"
-                      placeholder="Nome" />
+                    <input type="text" id="name" v-model="name" required class="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-pink-light focus:border-pink-light outline-none transition-colors" placeholder="Nome" />
                   </div>
                 </div>
 
@@ -173,13 +159,7 @@ const handleSubmit = () => {
                       <path d="M2 21a8 8 0 0 1 16 0"></path>
                       <circle cx="10" cy="8" r="5"></circle>
                     </svg>
-                    <input
-                      type="text"
-                      id="surname"
-                      v-model="surname"
-                      required
-                      class="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-pink-light focus:border-pink-light outline-none transition-colors"
-                      placeholder="Cognome" />
+                    <input type="text" id="surname" v-model="surname" required class="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-pink-light focus:border-pink-light outline-none transition-colors" placeholder="Cognome" />
                   </div>
                 </div>
               </div>
@@ -203,13 +183,7 @@ const handleSubmit = () => {
                   <path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"></path>
                   <rect x="2" y="4" width="20" height="16" rx="2"></rect>
                 </svg>
-                <input
-                  type="email"
-                  id="email"
-                  v-model="email"
-                  required
-                  class="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-pink-light focus:border-pink-light outline-none transition-colors"
-                  placeholder="admin@ccbeautylab.it" />
+                <input type="email" id="email" v-model="email" required class="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-pink-light focus:border-pink-light outline-none transition-colors" placeholder="admin@ccbeautylab.it" />
               </div>
             </div>
 
@@ -231,43 +205,13 @@ const handleSubmit = () => {
                   <rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect>
                   <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                 </svg>
-                <input
-                  :type="showPassword ? 'text' : 'password'"
-                  id="password"
-                  v-model="password"
-                  required
-                  class="w-full pl-12 px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-pink-light focus:border-pink-light outline-none transition-colors"
-                  placeholder="••••••••" />
+                <input :type="showPassword ? 'text' : 'password'" id="password" v-model="password" required class="w-full pl-12 px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-pink-light focus:border-pink-light outline-none transition-colors" placeholder="••••••••" />
                 <button v-if="password.length > 0" @click="showPassword = !showPassword" type="button" class="absolute right-3 top-1/2 -translate-y-1/2">
-                  <svg
-                    v-if="!showPassword"
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    class="lucide lucide-eye h-4 w-4"
-                    aria-hidden="true">
+                  <svg v-if="!showPassword" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye h-4 w-4" aria-hidden="true">
                     <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path>
                     <circle cx="12" cy="12" r="3"></circle>
                   </svg>
-                  <svg
-                    v-else
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    class="lucide lucide-eye-off h-4 w-4"
-                    aria-hidden="true">
+                  <svg v-else xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye-off h-4 w-4" aria-hidden="true">
                     <path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"></path>
                     <path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"></path>
                     <path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"></path>
@@ -305,35 +249,11 @@ const handleSubmit = () => {
                     class="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-pink-light focus:border-pink-light outline-none transition-colors"
                     placeholder="••••••••" />
                   <button v-if="confirmPassword.length > 0" @click="showConfirmPassword = !showConfirmPassword" type="button" class="absolute right-3 top-1/2 -translate-y-1/2">
-                    <svg
-                      v-if="!showConfirmPassword"
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      class="lucide lucide-eye h-4 w-4"
-                      aria-hidden="true">
+                    <svg v-if="!showConfirmPassword" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye h-4 w-4" aria-hidden="true">
                       <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path>
                       <circle cx="12" cy="12" r="3"></circle>
                     </svg>
-                    <svg
-                      v-else
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      class="lucide lucide-eye-off h-4 w-4"
-                      aria-hidden="true">
+                    <svg v-else xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye-off h-4 w-4" aria-hidden="true">
                       <path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"></path>
                       <path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"></path>
                       <path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"></path>
@@ -344,10 +264,7 @@ const handleSubmit = () => {
               </div>
             </transition>
             <!-- Button Submit -->
-            <button
-              type="submit"
-              :disabled="isLoading"
-              class="w-full bg-primary hover:bg-primary/70 disabled:cursor-not-allowed disabled:opacity-70 text-text-main font-semibold py-3 px-4 rounded-lg transition-colors duration-200">
+            <button type="submit" :disabled="isLoading" class="w-full bg-primary hover:bg-primary/70 disabled:cursor-not-allowed disabled:opacity-70 text-text-main font-semibold py-3 px-4 rounded-lg transition-colors duration-200">
               {{ isLoading ? "Attendere..." : isLogin ? "Accedi" : "Registrati" }}
             </button>
           </form>
@@ -366,11 +283,7 @@ const handleSubmit = () => {
 
 .fade-enter-from,
 .fade-leave-to {
-  opacity: 0;
   max-height: 0;
-  padding-top: 0;
-  padding-bottom: 0;
-  margin-top: 0;
   margin-bottom: 0;
   border-width: 0;
   transform: translateY(-8px);
