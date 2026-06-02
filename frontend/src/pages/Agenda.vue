@@ -68,16 +68,13 @@ onMounted(() => {
 
 const calendarEvents = computed(() => {
   return appointmentStore.appointmentsList.map((appt) => {
-    // Uniamo i nomi dei trattamenti in una singola stringa separata da virgola per poterli passare a FullCalendar
-    const serviceNames = appt.treatments.map((t: any) => t.name).join(", ");
-
     return {
       id: String(appt.id),
       title: `${appt.client_name} ${appt.client_surname}`,
       start: `${appt.date}T${appt.start_time}:00`,
       end: `${appt.date}T${appt.end_time}:00`,
       extendedProps: {
-        service: serviceNames,
+        treatmentsData: appt.treatments,
         notes: appt.notes,
       },
     };
@@ -300,12 +297,19 @@ onUnmounted(() => {
               v-else
               @contextmenu.prevent="openContextMenu($event, arg.event)"
               class="h-full w-full flex flex-col pt-0.5 px-1.5 pb-1 rounded-xl border-l-4 bg-blue-50 border-primary text-gray-800 overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer items-start justify-start leading-none gap-0.5">
-              <div class="flex items-start justify-start gap-1 w-full overflow-hidden">
-                <div class="text-xs font-bold text-primary whitespace-nowrap">
-                  {{ arg.timeText }}
+              <div class="w-full">
+                <div class="flex items-start justify-start gap-2 w-full">
+                  <div class="text-xs font-bold text-primary whitespace-nowrap">{{ arg.timeText }}</div>
+                  <div class="text-xs font-semibold text-left truncate leading-tight">{{ arg.event.title }}</div>
                 </div>
-                <div class="text-xs font-semibold text-left truncate leading-tight">
-                  {{ arg.event.title }}
+
+                <div class="mt-1 w-full">
+                  <div class="flex flex-col gap-1 max-h-20 overflow-auto">
+                    <div v-for="(treatment, index) in arg.event.extendedProps.treatmentsData" :key="index" class="flex items-center text-xs text-gray-700 px-1 py-0.5 rounded bg-white/60 border border-gray-200/50 shadow-sm">
+                      <span class="w-2 h-2 rounded-full mr-2 shrink-0" :style="{ backgroundColor: treatment.color }"></span>
+                      <span class="truncate">{{ treatment.name }}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
