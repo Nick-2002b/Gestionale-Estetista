@@ -22,6 +22,7 @@ const price = ref<number | "">(0);
 const description = ref("");
 const showNewCategoryForm = ref(false);
 const newCategoryName = ref("");
+const color = ref("#ec4899");
 
 const resetFields = () => {
   name.value = "";
@@ -44,6 +45,7 @@ const fillFields = (treatment?: Partial<Treatment>) => {
   duration.value = treatment.duration ?? 30;
   price.value = treatment.price ?? 0;
   description.value = treatment.description ?? "";
+  color.value = treatment.color ?? "#ec4899";
 };
 
 watch(
@@ -73,6 +75,7 @@ const handleSave = () => {
     price: Number(price.value),
     description: description.value,
     is_active: props.treatment?.is_active ?? 1,
+    color: color.value,
   };
 
   emit("save", payload);
@@ -113,7 +116,19 @@ const handleCreateCategory = async () => {
         <label class="block text-sm font-semibold text-gray-700 mb-1">Nome Trattamento <span class="text-red-500">*</span></label>
         <input v-model="name" type="text" class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-300 focus:border-pink-300 outline-none" placeholder="Nome trattamento" />
       </div>
-
+      <!-- Scelta del colore -->
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Colore Identificativo</label>
+        <div class="flex items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 p-3 shadow-sm">
+          <div class="relative h-11 w-11 shrink-0 overflow-hidden rounded-full border-2 border-white shadow-md ring-1 ring-gray-200" :style="{ backgroundColor: color }">
+            <input type="color" v-model="color" class="absolute inset-0 h-full w-full cursor-pointer opacity-0" aria-label="Scegli colore identificativo" />
+          </div>
+          <div class="min-w-0 flex-1">
+            <p class="text-xs font-medium uppercase tracking-wider text-gray-400">Colore selezionato</p>
+            <span class="block truncate font-mono text-sm text-gray-700">{{ color }}</span>
+          </div>
+        </div>
+      </div>
       <div>
         <label class="block text-sm font-semibold text-gray-700 mb-1">Categoria <span class="text-red-500">*</span></label>
         <div class="flex gap-2">

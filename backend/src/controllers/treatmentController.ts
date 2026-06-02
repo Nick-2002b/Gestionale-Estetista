@@ -85,7 +85,7 @@ export const createCategory = async (req: Request, res: Response): Promise<void>
 
 export const createTreatment = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { name, category_id, description, duration, price } = req.body;
+    const { name, category_id, description, duration, price, color } = req.body;
 
     if (!name || !category_id || !duration) {
       res.status(400).json({ error: "Nome, categoria e durata sono campi obbligatori" });
@@ -94,9 +94,9 @@ export const createTreatment = async (req: Request, res: Response): Promise<void
 
     const db = await getDb();
     const result = await db.run(
-      `INSERT INTO treatments (name, category_id, description, duration, price, is_active) 
-       VALUES (?, ?, ?, ?, ?, 1)`,
-      [name, category_id, description || null, duration, price || null],
+      `INSERT INTO treatments (name, category_id, description, duration, price, is_active, color) 
+       VALUES (?, ?, ?, ?, ?, 1, ?)`,
+      [name, category_id, description || null, duration, price || null, color || "#ec4899"],
     );
 
     res.status(201).json({
@@ -108,6 +108,7 @@ export const createTreatment = async (req: Request, res: Response): Promise<void
         description,
         duration,
         price,
+        color: color || "#ec4899",
         is_active: 1,
       },
     });
@@ -148,7 +149,7 @@ export const editTreatment = async (req: Request, res: Response): Promise<void> 
   const db = await getDb();
   const treatmentId = req.params.id;
   try {
-    const { name, category_id, description, duration, price } = req.body;
+    const { name, category_id, description, duration, price, color } = req.body;
     if (!name || !category_id || !duration) {
       res.status(400).json({ error: "Nome, categoria e durata sono obbligatori" });
       return;
@@ -156,10 +157,10 @@ export const editTreatment = async (req: Request, res: Response): Promise<void> 
     const result = await db.run(
       `
       UPDATE treatments
-      SET name = ?, category_id = ?, description = ?, duration = ?, price = ?
+      SET name = ?, category_id = ?, description = ?, duration = ?, price = ?, color = ?
       WHERE id = ?
   `,
-      [name, category_id, description || null, duration, price || null, treatmentId],
+      [name, category_id, description || null, duration, price || null, color || "#ec4899", treatmentId],
     );
     if (result.changes === 0) {
       res.status(404).json({ error: "Trattamento non trovato" });

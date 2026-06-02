@@ -158,6 +158,7 @@ const cancelDeleteCategory = () => {
 
     <ConfirmDialog :is-open="isCategoryConfirmOpen" title="Elimina Categoria" message="Sei sicuro di voler eliminare questa categoria?" @confirm="confirmDeleteCategory" @cancel="cancelDeleteCategory" />
 
+    <!-- Modal per la gestione delle categorie-->
     <BaseModal :is-open="isCategoriesModalOpen" title="Gestione Categorie" @close="closeCategoriesModal">
       <div v-if="categoryErrorMessage" class="mb-4 p-3 bg-red-50 text-red-600 rounded-xl text-sm border border-red-100 flex items-center gap-2">
         <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -215,8 +216,8 @@ const cancelDeleteCategory = () => {
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
       <div v-for="t in filteredTreatments" :key="t.id" class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm flex flex-col hover:shadow-md transition-shadow">
         <div class="flex items-center mb-4">
-          <div class="inline-flex items-center px-3 py-1 bg-gray-50 border border-gray-100 rounded-full">
-            <svg class="w-4 h-4 text-gray-500 mr-1.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div class="inline-flex items-center px-3 py-1 border border-gray-100 rounded-full" :style="{ backgroundColor: t.color }">
+            <svg class="w-4 h-h mr-1.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
             </svg>
             <span class="text-xs font-bold text-gray-800 uppercase tracking-widest">{{ t.category_name }}</span>

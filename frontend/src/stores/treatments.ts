@@ -11,6 +11,7 @@ export interface Treatment {
   duration: number;
   price: number;
   is_active: number;
+  color: string;
 }
 export interface Category {
   id: number;

@@ -74,6 +74,7 @@ export const initDb = async () => {
       price REAL,
       description TEXT,
       is_active INTEGER DEFAULT 1,
+      color TEXT DEFAULT '#ec4899',
       FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE RESTRICT
     );
   `);
@@ -94,9 +95,9 @@ export const initDb = async () => {
   // Tabella Ponte (Relazione Molti-a-Molti tra Appuntamenti e Trattamenti
   await db.exec(`
     CREATE TABLE IF NOT EXISTS appointment_treatments (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
       appointment_id INTEGER NOT NULL,
       treatment_id INTEGER NOT NULL,
-      PRIMARY KEY (appointment_id, treatment_id),
       FOREIGN KEY (appointment_id) REFERENCES appointments(id) ON DELETE CASCADE,
       FOREIGN KEY (treatment_id) REFERENCES treatments(id) ON DELETE CASCADE
     );
@@ -112,11 +113,12 @@ export const initDb = async () => {
   if (treatmentsCount.count === 0) {
     await db.exec(`INSERT INTO categories (name) VALUES ('Mani'), ('Viso'), ('Corpo');`);
     await db.exec(`
-      INSERT INTO treatments (name, category_id, description, duration, price, is_active) VALUES 
-      ('Manicure Classica', 1, 'Trattamento completo unghie naturali.', 45, 25.00, 1),
-      ('Massaggio', 3, '', 15, 55.00, 1),
-      ('Ceretta', 3, 'Ceretta busto', 60, 80.00, 1),
-      ('Baffi', 2, 'ceretta baffi', 10, 55.00, 1);
+      INSERT INTO treatments (name, category_id, description, duration, price, is_active, color) VALUES 
+      ('Manicure Classica', 1, 'Trattamento completo unghie naturali.', 45, 25.00, 1,'#ffc0cb'),
+      ('Massaggio', 3, '', 15, 55.00, 1, '#30d5c8'),
+      ('Ceretta', 3, 'Ceretta busto', 60, 80.00, 1, '#30d5c8'),
+      ('Baffi', 2, 'ceretta baffi', 10, 55.00, 1, '#60a5fa'),
+      ('Pulizia Viso Profonda', 2, 'Pulizia con vapore e maschera purificante.', 75, 55.00, 1, '#60a5fa');;
     `);
   }
   console.log("Database Created");
