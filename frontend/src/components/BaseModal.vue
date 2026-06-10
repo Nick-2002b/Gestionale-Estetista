@@ -19,7 +19,7 @@ const handleClose = () => {
       <div v-if="isOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/40" @click="handleClose"></div>
 
-        <div class="relative w-full bg-surface rounded-2xl shadow-2xl overflow-hidden max-w-lg flex flex-col">
+        <div class="relative w-full bg-surface rounded-2xl shadow-2xl overflow-hidden max-w-lg flex flex-col max-h-full">
           <div class="flex items-center justify-between gap-4 p-4 md:p-6 border-b border-gray-200 bg-gray-50 shrink-0">
             <slot name="header">
               <h2 class="text-xl font-bold text-gray-800">{{ title }}</h2>
